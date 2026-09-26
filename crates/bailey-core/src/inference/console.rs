@@ -21,6 +21,10 @@ pub fn console(run: &Path, device: &Device) -> Result<()> {
     println!("/brut : completion ; /dialogue : format question/reponse ; /quitter : sortie");
     println!("/recherche sujet : Wikipedia ; /memoire sujet : sources deja conservees");
     let mut dialogue = true;
+    let mut sampling = super::Sampling::default();
+    let mut diagnostic = false;
+    println!("Calcul sur {device:?} | /greedy ; /sampling ; /diagnostic");
+    println!("Cette console ne s'entraine pas en attendant tes messages.");
     loop {
         print!("Toi > ");
         io::stdout().flush()?;
@@ -46,6 +50,27 @@ pub fn console(run: &Path, device: &Device) -> Result<()> {
         match text {
             "" => continue,
             "/quitter" => break,
+            "/greedy" => {
+                sampling = super::Sampling::default();
+                println!("Generation deterministe, sans penalite de repetition.");
+                continue;
+            }
+            "/sampling" => {
+                sampling = super::Sampling {
+                    temperature: 0.7,
+                    repetition_penalty: 1.1,
+                    ..Default::default()
+                };
+                println!(
+                    "Temperature 0.7, top-k 40, top-p 0.9, repetition 1.1. Ceci n'ajoute aucune connaissance."
+                );
+                continue;
+            }
+            "/diagnostic" => {
+                diagnostic = !diagnostic;
+                println!("Diagnostic des premieres predictions : {diagnostic}");
+                continue;
+            }
             "/brut" => {
                 dialogue = false;
                 println!("Completion libre.");
@@ -63,8 +88,21 @@ pub fn console(run: &Path, device: &Device) -> Result<()> {
         } else {
             text.to_owned()
         };
-        match super::generate(&model, &config.model, &tokenizer, &prompt, 64, device) {
-            Ok(text) => println!("Bailey > {text}\n"),
+        match super::generate_with(
+            &model,
+            &config.model,
+            &tokenizer,
+            &prompt,
+            96,
+            &sampling,
+            device,
+        ) {
+            Ok(result) => {
+                println!("Bailey > {}\n", result.text);
+                if diagnostic {
+                    println!("{}", serde_json::to_string_pretty(&result)?);
+                }
+            }
             Err(error) => eprintln!("Erreur : {error:#}"),
         }
     }

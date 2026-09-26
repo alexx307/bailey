@@ -117,6 +117,11 @@ pub fn execute(cli: Cli) -> Result<()> {
                     eval_every: args.eval_every,
                     seed: args.seed,
                     init_from: args.init_from,
+                    warmup_steps: args.warmup_steps,
+                    min_lr_ratio: args.min_lr_ratio,
+                    max_grad_norm: Some(args.max_grad_norm),
+                    evaluation_windows: args.evaluation_windows,
+                    objective: args.objective,
                 },
                 &args.out,
                 &device(cli.device)?,
@@ -126,21 +131,28 @@ pub fn execute(cli: Cli) -> Result<()> {
             run,
             prompt,
             tokens,
+            sampling,
+            diagnostics,
         } => {
+            if let Some(path) = &diagnostics {
+                ensure!(!path.exists(), "Rapport deja existant");
+            }
             let device = device(cli.device)?;
             let (model, config) = training::checkpoint::load(&run, &device)?;
             let tokenizer = crate::tokenization::load(&run.join("tokenizer.json"))?;
-            println!(
-                "{}",
-                crate::inference::generate(
-                    &model,
-                    &config.model,
-                    &tokenizer,
-                    &prompt,
-                    tokens,
-                    &device
-                )?
-            );
+            let result = crate::inference::generate_with(
+                &model,
+                &config.model,
+                &tokenizer,
+                &prompt,
+                tokens,
+                &sampling,
+                &device,
+            )?;
+            println!("{}", result.text);
+            if let Some(path) = diagnostics {
+                fs::write(path, serde_json::to_vec_pretty(&result)?)?;
+            }
             Ok(())
         }
         Command::Evaluate { run, file } => {
@@ -150,10 +162,21 @@ pub fn execute(cli: Cli) -> Result<()> {
             let loss =
                 training::evaluation::evaluate_file(&model, &file, &tokenizer, &config, &device)?;
             println!(
-                "Perte next-token sur quatre fenetres fixes : {loss:.4}. Ce n'est pas un score de conversation."
+                "Perte de prediction, objectif {} sur {} elements fixes au maximum : {loss:.4}. Ce n'est pas un score de conversation.",
+                serde_json::to_string(&config.objective)?,
+                config.evaluation_windows
             );
             Ok(())
         }
         Command::Console { run } => crate::inference::console(&run, &device(cli.device)?),
+        Command::PrepareDialogue { source, out } => {
+            crate::curriculum::dialogue_course::prepare(&source, &out)
+        }
+        Command::DialogueReport {
+            run,
+            prompts,
+            out,
+            tokens,
+        } => super::dialogue_report::run(&run, &prompts, &out, tokens, &device(cli.device)?),
     }
 }

@@ -24,6 +24,16 @@ Ces règles viennent des demandes explicites du propriétaire du projet.
 - MoE, adaptateurs, BitNet, quantification et auto-évolution sont des expériences
   ultérieures : les ajouter séparément après mesure d'une baseline fonctionnelle.
 - Conserver les anciennes expériences et les archives hors du code actif.
+- Priorité après les sorties répétitives : diagnostics des tokens, exemples
+  français vérifiés et évaluations de générations sur validation. Le sampling
+  ou une pénalité de répétition ne constituent pas un apprentissage.
+- Pour le dialogue supervisé, conserver chaque échange complet et masquer les
+  questions et le remplissage dans la perte ; apprendre le marqueur de fin.
+  Évaluer sur des échanges indépendants. Ne pas comparer directement cette perte
+  avec celle du pré-entraînement sur des fenêtres de texte continu.
+- Pour les futures séances cloud, préparer et vérifier les données localement
+  avant la location ; suivre `docs/plan/forge.md`. Un benchmark utilisé pour
+  promouvoir des candidates est une validation, pas le test final réservé.
 
 - Construire notre modèle en Rust, sans substituer un modèle préentraîné externe.
   Les poids aléatoires ne servent qu'à la première initialisation. Reprendre les

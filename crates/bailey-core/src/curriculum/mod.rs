@@ -9,5 +9,6 @@ mod world;
 
 pub use dataset::prepare;
 
+pub mod dialogue_course;
 #[cfg(test)]
 mod tests;

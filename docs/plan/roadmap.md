@@ -40,6 +40,16 @@ gestion explicite de la longueur de contexte.
 Critère : réponses utiles à des formulations nouvelles, fin de réponse correcte,
 mesure séparée des erreurs factuelles, des calculs et du français.
 
+Un cours original versionné dans `assets/curricula/french-dialogue-v1/` ajoute
+170 échanges train et deux partitions de 28 reformulations. Il sert à un essai
+limité de dialogue et ne remplace pas la phase de pré-entraînement substantiel.
+Sampling et diagnostics top-k sont séparés des modifications de poids.
+Un objectif de dialogue supervise les réponses sur des échanges isolés ; la
+validation utilise des échanges indépendants avec le même masquage.
+Les [mesures du cours](../validation/dialogue-2026-09-26.md) montrent des réponses
+enseignées correctes et encore de nombreuses erreurs sur les reformulations.
+Cette étape reste partielle ; le critère de dialogue général n'est pas atteint.
+
 ## 4. Mémoire et outils
 
 La bibliothèque Wikipédia et la collecte bornée existent. La consultation conserve
@@ -67,3 +77,7 @@ le coût des données, gradients, états d'optimiseur ou transferts mémoire.
 
 L'auto-modification du logiciel appartient à un superviseur externe, avec
 candidates distinctes, tests, promotion et retour à la version précédente.
+
+La préparation locale des futures séances GPU distantes est détaillée dans
+[le plan Forge](forge.md). Shards, reprise complète d'Adam et lancement cloud
+restent à implémenter ; aucune location n'est lancée.

@@ -1,4 +1,5 @@
 mod cli;
+mod dialogue_report;
 mod dispatch;
 mod probe;
 mod research_args;

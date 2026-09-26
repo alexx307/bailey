@@ -68,6 +68,42 @@ FlashAttention d'entraînement, précision mixte et accumulation des gradients
 ne sont pas encore implémentés. La limite de contexte n'est pas une promesse
 de débit ou de consommation mémoire à cette longueur.
 
+## Cours de français et diagnostics
+
+Le cours versionné contient 170 échanges d'entraînement, 28 de validation et
+28 réservés au test. Il reste un exercice limité, pas un pré-entraînement complet.
+
+```powershell
+.\tools\learn\train-dialogue.ps1 -Steps 800
+```
+
+Le script reprend les poids actifs et leur tokenizer, crée une nouvelle séance
+CUDA, puis enregistre des générations sur la validation. Il laisse la version
+active inchangée pour permettre d'examiner le résultat. Le taux monte progressivement
+puis décroît ; les gradients sont bornés et le débit est journalisé.
+
+`train --objective dialogue` apprend sur des échanges complets indépendants,
+avec une perte limitée à la réponse et au marqueur de fin. Le remplissage des
+lots est ignoré dans cette perte. `--objective next-token` reste le mode normal
+pour le pré-entraînement sur du texte continu. Leurs pertes ne sont pas directement
+comparables : les cibles et contextes diffèrent.
+
+Dans la console, `/diagnostic` affiche les premières prédictions et la raison
+d'arrêt. `/greedy` conserve le choix déterministe ; `/sampling` active température,
+top-k, top-p et pénalité de répétition. Changer ces réglages n'apprend rien au modèle.
+La console indique son périphérique et ne s'entraîne pas pendant l'attente.
+
+La commande `generate` accepte `--temperature`, `--top-k`, `--top-p`,
+`--repetition-penalty`, `--seed` et `--diagnostics chemin.json`.
+`dialogue-report --run chemin --prompts validation.json --out rapport.json`
+conserve les questions, références, générations et diagnostics, sans donner
+un pourcentage trompeur de compréhension. Les probabilités affichées sont
+renormalisées sur les IDs effectivement connus du tokenizer.
+
+Le [plan Forge](docs/plan/forge.md) décrit la préparation locale des données
+avant de futures séances sur GPU distant. La location et le lancement cloud
+ne sont pas encore implémentés.
+
 ## Reprendre les acquis
 
 Pour ouvrir une fenêtre de console sur la version active :
@@ -76,9 +112,11 @@ Pour ouvrir une fenêtre de console sur la version active :
 .\tools\launch\start-core.ps1
 ```
 
-Les [résultats du 26 septembre](docs/validation/core-2026-09-26.md) décrivent
-les essais réels 100M et la boucle Internet. Le modèle reste au stade de contrôle
-technique ; il n'a pas encore reçu un pré-entraînement suffisant pour dialoguer.
+Les [premiers résultats](docs/validation/core-2026-09-26.md) décrivent les essais
+100M et la boucle Internet. Le [cours de dialogue](docs/validation/dialogue-2026-09-26.md)
+permet maintenant quelques réponses enseignées correctes, mais beaucoup de
+reformulations échouent encore. Le modèle reste expérimental et n'a pas reçu un
+pré-entraînement suffisant pour une conversation générale.
 
 ```powershell
 cargo run -- train --init-from runs/core-smoke --tokenizer runs/core-smoke/tokenizer.json --out runs/core-suite

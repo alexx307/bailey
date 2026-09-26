@@ -39,6 +39,15 @@ pub fn fixed_batch(ids: &[u32], sequence: usize, device: &Device) -> Result<(Ten
     batch(ids, sequence, (0..4).map(|i| i * span / 3), device)
 }
 
+pub fn window(
+    ids: &[u32],
+    sequence: usize,
+    start: usize,
+    device: &Device,
+) -> Result<(Tensor, Tensor)> {
+    batch(ids, sequence, [start].into_iter(), device)
+}
+
 fn batch(
     ids: &[u32],
     sequence: usize,

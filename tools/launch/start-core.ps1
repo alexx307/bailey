@@ -1,4 +1,4 @@
-param([string]$ModelRun = '', [switch]$Cpu)
+param([string]$ModelRun = '', [switch]$Cpu, [switch]$SkipBuild)
 $ErrorActionPreference = 'Stop'
 $projectDirectory = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if (!$ModelRun) {
@@ -11,7 +11,7 @@ if (!(Test-Path -LiteralPath (Join-Path $modelDirectory 'best.json'))) { throw "
 $sessionId = (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + [guid]::NewGuid().ToString('N').Substring(0,4)
 $sessionDirectory = Join-Path $projectDirectory "runs/sessions/core-$sessionId"
 New-Item -ItemType Directory -Path $sessionDirectory | Out-Null
-$spec = @{project=$projectDirectory; model=$modelDirectory; session=$sessionDirectory; cpu=[bool]$Cpu}
+$spec = @{project=$projectDirectory; model=$modelDirectory; session=$sessionDirectory; cpu=[bool]$Cpu; skipBuild=[bool]$SkipBuild}
 $specPath = Join-Path $sessionDirectory 'session.json'
 $spec | ConvertTo-Json | Set-Content -LiteralPath $specPath -Encoding utf8
 $scriptPath = Join-Path $PSScriptRoot 'core-session.ps1'

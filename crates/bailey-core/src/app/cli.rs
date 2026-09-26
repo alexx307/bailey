@@ -52,7 +52,7 @@ pub enum Command {
         #[arg(long)]
         report: PathBuf,
     },
-    /// Entrainement next-token ; --tiny sert uniquement a verifier le pipeline.
+    /// Entrainement texte ou dialogue masque ; --tiny verifie seulement le pipeline.
     Train(TrainArgs),
     /// Mesurer la prediction de tokens sur un fichier reserve.
     Evaluate {
@@ -69,16 +69,40 @@ pub enum Command {
         prompt: String,
         #[arg(long, default_value_t = 64)]
         tokens: usize,
+        #[command(flatten)]
+        sampling: crate::inference::Sampling,
+        #[arg(long)]
+        diagnostics: Option<PathBuf>,
     },
     /// Console experimentale ; le modele doit avoir appris le dialogue.
     Console {
         #[arg(long)]
         run: PathBuf,
     },
+    /// Preparer un cours original par sujets et partitions controlees.
+    PrepareDialogue {
+        #[arg(long, default_value = "assets/curricula/french-dialogue-v1")]
+        source: PathBuf,
+        #[arg(long, default_value = "data/french-dialogue-v1")]
+        out: PathBuf,
+    },
+    /// Generations sur un jeu de developpement, jamais le test final.
+    DialogueReport {
+        #[arg(long)]
+        run: PathBuf,
+        #[arg(long)]
+        prompts: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 64)]
+        tokens: usize,
+    },
 }
 
 #[derive(Args)]
 pub struct TrainArgs {
+    #[arg(long, value_enum, default_value = "next-token")]
+    pub objective: crate::training::Objective,
     #[arg(long, default_value = "configs/core-100m.json")]
     pub config: PathBuf,
     #[arg(long, default_value = "data/core-seed")]
@@ -103,4 +127,12 @@ pub struct TrainArgs {
     pub init_from: Option<PathBuf>,
     #[arg(long)]
     pub tiny: bool,
+    #[arg(long, default_value_t = 0)]
+    pub warmup_steps: usize,
+    #[arg(long, default_value_t = 1.0)]
+    pub min_lr_ratio: f64,
+    #[arg(long, default_value_t = 1.0)]
+    pub max_grad_norm: f64,
+    #[arg(long, default_value_t = 16)]
+    pub evaluation_windows: usize,
 }

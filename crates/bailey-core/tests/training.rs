@@ -40,6 +40,11 @@ fn training_saves_reloads_and_continues_without_changing_the_previous_run() -> R
         eval_every: 20,
         seed: 42,
         init_from: None,
+        warmup_steps: 4,
+        min_lr_ratio: 0.2,
+        max_grad_norm: Some(1.0),
+        evaluation_windows: 8,
+        objective: training::Objective::NextToken,
     };
     let run = temp.path().join("first");
     training::train(config.clone(), &run, &Device::Cpu)?;
@@ -60,6 +65,7 @@ fn training_saves_reloads_and_continues_without_changing_the_previous_run() -> R
     let mut resumed = config;
     resumed.init_from = Some(run.clone());
     resumed.steps = 1;
+    resumed.warmup_steps = 0;
     training::train(resumed.clone(), &temp.path().join("next"), &Device::Cpu)?;
     assert_eq!(fs::read(run.join("metrics.jsonl"))?, original);
     let stopped = temp.path().join("stopped");
