@@ -102,7 +102,8 @@ renormalisées sur les IDs effectivement connus du tokenizer.
 
 Le [plan Forge](docs/plan/forge.md) décrit la préparation locale des données
 avant de futures séances sur GPU distant. La location et le lancement cloud
-ne sont pas encore implémentés.
+ne sont pas encore implémentés. Le [rapport Forge](docs/validation/forge-2026-09-26.md)
+documente les corpus pilotes, les 41 tests et l'arrêt/reprise CUDA du modèle 100M.
 
 ## Reprendre les acquis
 
@@ -123,13 +124,60 @@ cargo run -- train --init-from runs/core-smoke --tokenizer runs/core-smoke/token
 cargo run -- console --run runs/core-suite
 ```
 
-La reprise charge les meilleurs poids et l'architecture précédente ; le tokenizer
-doit être identique. L'optimiseur est recréé : ce n'est pas une reprise exacte de
-son état. La première initialisation du nouveau cœur est nécessaire, car les
-anciens poids par octets ne correspondent ni à son architecture ni à son tokenizer.
+`train --init-from` charge les meilleurs poids et l'architecture précédente ; le
+tokenizer doit être identique. L'optimiseur est recréé pour cette nouvelle séance.
+La commande `resume` reprend au contraire une séance interrompue, avec les poids
+de la dernière étape sauvegardée, les moments AdamW, le planning et les tirages
+des lots. Elle exige les nouveaux checkpoints complets et un nouveau dossier :
 
-Créer un fichier `STOP` dans un dossier d'entraînement arrête entre deux étapes.
-Chaque version a son dossier ; les checkpoints SafeTensors précédents sont conservés.
+```powershell
+& target/debug/bailey-core.exe --device cuda resume `
+  --run runs/seance-interrompue --out runs/seance-reprise
+```
+
+Les checkpoints anciens sans état Adam restent utilisables avec `--init-from`.
+Le format/tokenizer des anciens poids Burn ne correspond pas à ce nouveau cœur.
+
+Créer un fichier `STOP` dans un dossier d'entraînement arrête entre deux étapes
+et sauvegarde l'état complet. `--stop-after N` permet aussi un arrêt programmé
+sans modifier le planning total. `latest.json` désigne la reprise et `best.json`
+la meilleure validation. Chaque snapshot 100M FP32 avec les deux moments occupe
+environ 1,12 Gio ; les versions précédentes sont conservées. Prévoir l'espace
+disque et un intervalle `--eval-every` adapté.
+
+## Corpus et nombre de tokens
+
+```powershell
+& target/debug/bailey-core.exe tokenizer-info --tokenizer data/core-tokenizer
+& target/debug/bailey-core.exe forge-info --data data/forge-wikipedia-fr-v1
+```
+
+Le tokenizer actuel compte **1 131 entrées**, la tête du modèle dispose de
+32 000 places, et le corpus Wikipédia préparé contient **1 453 862 tokens
+d'entraînement**. Ces trois nombres mesurent des choses différentes.
+
+`hf-import` importe un pilote français FineWeb2-HQ avec sources et budgets.
+`curate-text` retire les passages identiques aux partitions réservées en conservant
+l'original. `forge-build` transforme les textes en shards U32, puis le chargeur
+vérifie leurs empreintes et leur tokenizer. Voir le [guide Hugging Face](docs/data/huggingface.md)
+et le [corpus Wikipédia](docs/data/french-foundation.md).
+
+Pour une nouvelle expérience CUDA à partir des poids français actuels :
+
+```powershell
+& target/debug/bailey-core.exe --device cuda train `
+  --data data/forge-wikipedia-fr-v1 --data-format shards `
+  --tokenizer runs/core-dialogue-sft-20260926-v1/model/tokenizer.json `
+  --init-from runs/core-dialogue-sft-20260926-v1/model `
+  --out runs/core-forge-NOUVEAU --steps 100 --stop-after 40 `
+  --sequence 128 --batch-size 2 --learning-rate 0.00001 `
+  --warmup-steps 10 --min-lr-ratio 0.1 --eval-every 50
+```
+
+Les shards actuels servent au texte continu (`next-token`), pas au dialogue
+masqué. Le prototype charge la partition en RAM et n'est pas encore un lecteur
+en flux pour des milliards de tokens. Aucun de ces pilotes ne remplace un
+pré-entraînement substantiel ni une évaluation des compétences.
 
 ## Lecture Internet
 
@@ -155,6 +203,7 @@ crates/bailey-core/src/
   model/          réseau, attention, positions, normalisation
   tokenization/   apprentissage et chargement BPE
   curriculum/     corpus français initial et partitions
+  forge/          import HF, curation, shards et intégrité
   training/       lots, AdamW, évaluation, checkpoints
   inference/      génération et console
   web/            API Wikipédia

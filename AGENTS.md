@@ -34,6 +34,28 @@ Ces règles viennent des demandes explicites du propriétaire du projet.
 - Pour les futures séances cloud, préparer et vérifier les données localement
   avant la location ; suivre `docs/plan/forge.md`. Un benchmark utilisé pour
   promouvoir des candidates est une validation, pas le test final réservé.
+- Distinguer le vocabulaire réel du tokenizer, la capacité de la tête du modèle
+  et le nombre de tokens du corpus. Ne pas remplacer le tokenizer d'un modèle
+  appris sans migration explicite ou expérience indépendante.
+- Les shards Forge sont immuables : vérifier les SHA256, la provenance et les
+  IDs du tokenizer avant leur utilisation. Ne charger que train et validation
+  pendant l'entraînement. Le prototype actuel charge une partition en RAM ; ne
+  pas le présenter comme un lecteur en flux adapté à des milliards de tokens.
+- `--init-from` ouvre une nouvelle séance avec les meilleurs poids et un nouvel
+  AdamW. `resume` continue une séance interrompue depuis `latest.json`, avec les
+  moments Adam, le pas global, le planning et les tirages par étape. Toujours
+  écrire dans un nouveau dossier ; refuser des données ou réglages modifiés.
+- Conserver `best.json` pour la sélection d'inférence et `latest.json` pour la
+  reprise. Publier ce dernier seulement après une sauvegarde complète. La reprise
+  CPU est testée à l'identique ; ne pas promettre une identité numérique entre
+  versions du backend ou matériels différents.
+- Décontaminer les corpus avant les expériences : les passages réservés restent
+  réservés, les copies sont retirées de l'entraînement. Conserver l'original et
+  l'audit des transformations. Cette comparaison de données ne doit pas devenir
+  une évaluation du modèle sur le test ni un moyen d'inventer ses réponses.
+- Un import incomplet ou interrompu ne produit pas de manifeste consommable par
+  Forge. Respecter les budgets et erreurs HTTP ; ne pas intégrer automatiquement
+  des textes Internet comme des faits validés.
 
 - Construire notre modèle en Rust, sans substituer un modèle préentraîné externe.
   Les poids aléatoires ne servent qu'à la première initialisation. Reprendre les

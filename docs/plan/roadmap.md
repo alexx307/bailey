@@ -7,7 +7,7 @@ en Rust, apprendre d'abord le français, puis ajouter les compétences de code.
 
 Cœur Candle 100M : GQA, RoPE, RMSNorm, SwiGLU, embeddings partagés. Tokenizer BPE
 local, corpus séparés, entraînement AdamW, sauvegarde SafeTensors et reprise des
-poids. Le modèle réduit sert uniquement aux tests rapides ; il ne remplace pas
+poids et de l'état complet AdamW après interruption. Le modèle réduit sert uniquement aux tests rapides ; il ne remplace pas
 la cible 100M. Vérifier causalité, gradients de chaque matrice, absence d'écrasement,
 sauvegarde/rechargement et consommation réelle avant d'allonger les séances.
 
@@ -20,7 +20,10 @@ Assembler un corpus substantiel de textes français autorisés : descriptions,
 récits, explications, dialogues naturels, vocabulaire et grammaire. Conserver
 origine, licence, date et partition ; retirer doublons et textes dégradés.
 Réserver validation/test avant apprentissage du tokenizer. Les 120 unités
-actuelles ne servent qu'à vérifier la chaîne.
+originales ne servent qu'à vérifier la chaîne. Une collecte de 120 articles
+Wikipédia et un pilote FineWeb2-HQ de 100 documents sont maintenant exportés en
+shards vérifiés, avec validation et test séparés. Ce volume reste insuffisant
+pour affirmer un pré-entraînement français généraliste.
 
 Former le tokenizer définitif sur ce corpus d'entraînement ; figer ses IDs.
 Comparer d'abord plusieurs essais courts, mesurer tokens/seconde et VRAM,
@@ -79,5 +82,6 @@ L'auto-modification du logiciel appartient à un superviseur externe, avec
 candidates distinctes, tests, promotion et retour à la version précédente.
 
 La préparation locale des futures séances GPU distantes est détaillée dans
-[le plan Forge](forge.md). Shards, reprise complète d'Adam et lancement cloud
-restent à implémenter ; aucune location n'est lancée.
+[le plan Forge](forge.md). Shards et reprise complète d'Adam sont disponibles pour
+les essais locaux ; le lecteur en flux, l'import massif Parquet et le lancement
+cloud restent à implémenter. Aucune location n'est lancée.

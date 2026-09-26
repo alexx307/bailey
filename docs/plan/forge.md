@@ -8,17 +8,24 @@ document ne sont pas repris comme devis vérifié.
 
 1. `web/` et `research/` collectent des textes avec sources et budgets.
 2. `knowledge/` conserve les révisions, sépare les pages et retire les doublons
-   exacts. Ajouter une déduplication des textes proches et un contrôle de qualité.
+   exacts. `forge/curation.rs` retire les passages identiques partagés avec les
+   partitions réservées. L'import HF applique aussi des heuristiques de qualité
+   et SimHash ; elles ne garantissent ni factualité ni absence de doublons proches.
 3. `curriculum/` prépare des leçons. Les réponses inventées par Bailey ne sont
    pas considérées comme des vérités : exercices calculables, sources et revue
    indépendante doivent fournir la vérification.
-4. Futur `forge/dataset/` : produire des shards U32 pré-tokenisés, un manifeste
-   des sources/licences, les SHA256 du tokenizer et des shards, les effectifs
-   réels et la partition. Une file prête contient des données vérifiées, pas
-   seulement une liste d'URLs à visiter.
-5. `training/` : charger cette file avec un débit mesuré, enregistrer les poids,
-   puis l'état Adam, le scheduler, l'état du générateur et la position de lecture
-   pour une reprise exacte. Actuellement seuls les poids sont repris.
+4. `forge/dataset/` produit des shards U32 pré-tokenisés, un manifeste des sources,
+   les SHA256 du tokenizer et des shards, les effectifs réels et la partition.
+   Le chargeur vérifie leur intégrité et les IDs. Le constructeur reste limité à
+   512 Mio de texte par partition ; le lecteur charge la partition demandée en RAM
+   et refuse plus de 134 217 728 tokens. Il faut encore un lecteur en flux pour
+   les corpus de plusieurs milliards de tokens.
+5. `training/` mesure le débit et sauvegarde poids, moments AdamW, pas global et
+   sélection. Le planning utilise ce pas ; le tirage des fenêtres est déterminé
+   par la graine et le pas global, sans curseur de lecture mutable. `resume`
+   reprend cet état dans un nouveau dossier. `--init-from` reste une nouvelle
+   séance avec optimiseur neuf. La reprise CPU est testée contre un entraînement
+   continu ; l'identité numérique entre matériels/backends n'est pas garantie.
 6. `learning/` : comparer les candidates sur une validation fixe de sélection,
    puis conserver ou promouvoir une version avec possibilité de revenir en arrière.
 
@@ -42,10 +49,16 @@ nommer ses tâches, son nombre d'exemples et son critère de réussite.
 ## Ordre de livraison
 
 La priorité actuelle reste les bases françaises observables. Les diagnostics de
-génération, cours versionné, warmup, décroissance du taux, clipping et mesures de
-débit préparent les essais. Ensuite : corpus, shards, reprise exacte, comparaison
-locale, puis conditionnement cloud. BF16, accumulation, cache KV et attention
-optimisée nécessitent leurs propres tests numériques et mesures.
+génération, cours versionné, warmup, décroissance du taux, clipping, premiers shards
+et reprise complète sont disponibles. Les corpus pilotes comprennent 120 articles
+Wikipédia et un import de 100 documents FineWeb2-HQ ; ils ne constituent pas encore
+un pré-entraînement substantiel. Voir les [données françaises](../data/french-foundation.md)
+et le [pilote Hugging Face](../data/huggingface.md).
+
+Suite : ingestion Parquet avec projection du texte et révision figée, traitement
+en flux et déduplication à grande échelle, corpus élargi et revu, choix définitif
+du tokenizer, comparaison locale puis conditionnement cloud. BF16, accumulation,
+cache KV et attention optimisée nécessitent leurs propres tests et mesures.
 
 Le GPU loué sert à exécuter un travail déjà préparé. La collecte et la revue des
 données restent en amont. Aucun volume de tokens ni progrès de compétence n'est

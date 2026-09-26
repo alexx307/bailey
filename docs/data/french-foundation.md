@@ -44,8 +44,35 @@ de session ; les anciens corpus et poids restent conservés.
 
 ## Résultats de la session
 
-La collecte est en cours. Les effectifs et vérifications mesurés seront reportés
-ici après sa terminaison.
+Collecte terminée : **120 articles**, dont 101 en entraînement, 9 en validation
+et 10 en test. L'export brut contient respectivement 3 054 498, 199 829 et
+363 251 octets de texte.
+
+Le contrôle Forge a d'abord rejeté des passages identiques entre partitions.
+`curate-text` a créé `data/wikipedia-fr-curated-v1` : 22 fragments retirés de
+l'entraînement et 2 de la validation. Le test est conservé octet pour octet.
+Les SHA256 des fragments retirés et des fichiers avant/après sont dans le nouveau
+manifeste, avec la provenance originale. Aucun exemple du test n'a servi à
+entraîner ou évaluer le modèle.
+
+Les shards `data/forge-wikipedia-fr-v1` utilisent le tokenizer appris de
+**1 131 entrées**, sans changement d'IDs :
+
+| Partition | Octets texte après curation | Tokens | Shards U32 |
+| --- | ---: | ---: | ---: |
+| Entraînement | 3 052 696 | 1 453 862 | 15 |
+| Validation | 199 673 | 89 874 | 1 |
+| Test réservé | 363 251 | 164 246 | 2 |
+
+```powershell
+& target/debug/bailey-core.exe curate-text `
+  --data runs/forge-corpus-20260926-v1/datasets/cycle-0001 `
+  --out data/wikipedia-fr-curated-NOUVEAU
+& target/debug/bailey-core.exe forge-build `
+  --data data/wikipedia-fr-curated-NOUVEAU `
+  --tokenizer runs/core-dialogue-sft-20260926-v1/model/tokenizer.json `
+  --out data/forge-wikipedia-fr-NOUVEAU --shard-tokens 100000
+```
 
 ## Portée et suite
 
@@ -55,7 +82,8 @@ le wiki de provenance ; aucun classifieur linguistique indépendant n'est appliq
 Les résultats ne sont donc pas présentés comme un corpus entièrement relu.
 
 Avant de grossir la collecte ou d'en tirer un long entraînement : ajouter une
-déduplication des textes proches, examiner un échantillon de l'entraînement,
-mesurer longueurs et couverture du tokenizer, puis préparer des shards immuables
-avec provenance et empreintes. Le tokenizer actuel doit rester figé pour reprendre
-les poids existants. Un nouveau tokenizer exige une expérience distincte.
+déduplication des textes proches, examiner un échantillon de l'entraînement et
+mesurer longueurs et couverture du tokenizer. Les shards et leurs empreintes sont
+disponibles ; ils ne rendent pas le corpus pédagogiquement vérifié. Le tokenizer
+actuel doit rester figé pour reprendre les poids existants. Un nouveau tokenizer
+exige une expérience distincte ou une migration explicitement testée.
