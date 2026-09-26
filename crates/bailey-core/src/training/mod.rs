@@ -4,9 +4,11 @@ mod dataset;
 mod dialogue;
 pub mod evaluation;
 mod gradients;
+mod optimizer;
+mod progress;
 mod runner;
 mod schedule;
 mod training_data;
 
-pub use config::{Objective, TrainConfig};
-pub use runner::{train, train_controlled};
+pub use config::{DataFormat, Objective, TrainConfig};
+pub use runner::{resume, train, train_controlled, train_until};

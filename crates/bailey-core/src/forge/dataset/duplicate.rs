@@ -15,8 +15,13 @@ pub(super) struct Detector {
 impl Detector {
     pub(super) fn check(&mut self, partition: &str, text: &str) -> Result<()> {
         let normalized = text.replace("\r\n", "\n");
-        Self::insert(&mut self.files, hash(normalized.trim().as_bytes()), partition)?;
-        for fragment in normalized.lines()
+        Self::insert(
+            &mut self.files,
+            hash(normalized.trim().as_bytes()),
+            partition,
+        )?;
+        for fragment in normalized
+            .lines()
             .chain(normalized.split("\n\n"))
             .chain(normalized.split(crate::tokenization::EOS))
         {
@@ -30,7 +35,10 @@ impl Detector {
 
     fn insert(seen: &mut HashMap<String, String>, hash: String, partition: &str) -> Result<()> {
         if let Some(previous) = seen.get(&hash) {
-            ensure!(previous == partition, "Doublon exact entre {previous} et {partition} ; corriger les partitions avant la tokenisation");
+            ensure!(
+                previous == partition,
+                "Doublon exact entre {previous} et {partition} ; corriger les partitions avant la tokenisation"
+            );
         } else {
             seen.insert(hash, partition.to_owned());
         }

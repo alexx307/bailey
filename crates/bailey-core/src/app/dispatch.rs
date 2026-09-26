@@ -34,6 +34,8 @@ fn device(choice: DeviceChoice) -> Result<Device> {
 
 pub fn execute(cli: Cli) -> Result<()> {
     match cli.command {
+        Command::HfImport(args) => crate::forge::huggingface::import(&args),
+        Command::CurateText { data, out } => crate::forge::curation::curate(&data, &out),
         Command::ResearchTopic { topic } => {
             for article in
                 crate::research::search_and_store(&topic, "fr", Path::new("data/library"), 3)?
@@ -105,7 +107,7 @@ pub fn execute(cli: Cli) -> Result<()> {
             } else {
                 read_model(&args.config)?
             };
-            training::train(
+            training::train_until(
                 TrainConfig {
                     model,
                     data: args.data,
@@ -122,10 +124,61 @@ pub fn execute(cli: Cli) -> Result<()> {
                     max_grad_norm: Some(args.max_grad_norm),
                     evaluation_windows: args.evaluation_windows,
                     objective: args.objective,
+                    data_format: args.data_format,
                 },
                 &args.out,
                 &device(cli.device)?,
+                args.stop_after,
             )
+            .map(|_| ())
+        }
+        Command::Resume {
+            run,
+            out,
+            data,
+            stop_after,
+        } => training::resume(
+            &run,
+            &out,
+            data.as_deref(),
+            &device(cli.device)?,
+            stop_after,
+        )
+        .map(|_| ()),
+        Command::ForgeBuild {
+            data,
+            tokenizer,
+            out,
+            shard_tokens,
+        } => {
+            let manifest = crate::forge::dataset::build(&data, &tokenizer, &out, shard_tokens)?;
+            println!("{}", serde_json::to_string_pretty(&manifest)?);
+            Ok(())
+        }
+        Command::ForgeInfo { data } => {
+            let manifest = crate::forge::dataset::read_manifest(&data)?;
+            println!(
+                "Tokenizer : {} tokens de vocabulaire",
+                manifest.tokenizer.vocab_size
+            );
+            for p in manifest.partitions {
+                println!(
+                    "{} : {} tokens de corpus, {} shards, {} octets U32",
+                    p.name,
+                    p.tokens,
+                    p.shards.len(),
+                    p.tokens * 4
+                );
+            }
+            Ok(())
+        }
+        Command::TokenizerInfo { tokenizer } => {
+            let tokens = crate::tokenization::load(&tokenizer)?;
+            println!(
+                "Vocabulaire reel : {} tokens. Il s'agit du dictionnaire, pas du nombre de tokens du corpus.",
+                tokens.get_vocab_size(true)
+            );
+            Ok(())
         }
         Command::Generate {
             run,

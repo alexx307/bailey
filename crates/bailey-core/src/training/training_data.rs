@@ -30,12 +30,26 @@ pub enum TrainingData {
 impl TrainingData {
     pub fn load(file: &Path, tokenizer: &Tokenizer, config: &TrainConfig) -> Result<Self> {
         Ok(match config.objective {
-            Objective::NextToken => Self::Text(dataset::load(
-                file,
-                tokenizer,
-                config.sequence,
-                config.model.vocab_size,
-            )?),
+            Objective::NextToken => {
+                let ids = match config.data_format {
+                    super::DataFormat::Text => {
+                        dataset::load(file, tokenizer, config.sequence, config.model.vocab_size)?
+                    }
+                    super::DataFormat::Shards => crate::forge::dataset::load_partition(
+                        &config.data,
+                        file.file_stem()
+                            .and_then(|s| s.to_str())
+                            .ok_or_else(|| anyhow::anyhow!("Partition invalide"))?,
+                        &config.tokenizer,
+                        config.model.vocab_size,
+                    )?,
+                };
+                anyhow::ensure!(
+                    ids.len() > config.sequence,
+                    "Partition trop courte pour le contexte"
+                );
+                Self::Text(ids)
+            }
             Objective::Dialogue => Self::Dialogue(Dialogues::parse(
                 &fs::read_to_string(file)?,
                 tokenizer,

@@ -11,6 +11,14 @@ pub enum Objective {
     Dialogue,
 }
 
+#[derive(Clone, Copy, Default, Serialize, Deserialize, clap::ValueEnum)]
+#[serde(rename_all = "snake_case")]
+pub enum DataFormat {
+    #[default]
+    Text,
+    Shards,
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct TrainConfig {
     pub model: CoreConfig,
@@ -33,6 +41,8 @@ pub struct TrainConfig {
     pub evaluation_windows: usize,
     #[serde(default)]
     pub objective: Objective,
+    #[serde(default)]
+    pub data_format: DataFormat,
 }
 
 fn constant_rate() -> f64 {
@@ -45,6 +55,13 @@ fn legacy_windows() -> usize {
 impl TrainConfig {
     pub fn validate(&self) -> Result<()> {
         self.model.validate()?;
+        ensure!(
+            !matches!(
+                (self.data_format, self.objective),
+                (DataFormat::Shards, Objective::Dialogue)
+            ),
+            "Les shards actuels sont destines au texte continu ; le dialogue exige ses frontieres d'exemples"
+        );
         ensure!(
             (1..=1_000_000).contains(&self.steps),
             "Etapes attendues : 1..1000000"

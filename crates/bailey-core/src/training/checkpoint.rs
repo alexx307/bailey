@@ -5,7 +5,7 @@ use candle_core::{DType, Device};
 use candle_nn::{VarBuilder, VarMap};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{fs, path::Path};
+use std::{fs, io::Read, path::Path};
 
 #[derive(Serialize, Deserialize)]
 pub struct Selection {
@@ -14,7 +14,17 @@ pub struct Selection {
 }
 
 pub fn fingerprint(file: &Path) -> Result<String> {
-    Ok(format!("{:x}", Sha256::digest(fs::read(file)?)))
+    let mut input = fs::File::open(file)?;
+    let mut digest = Sha256::new();
+    let mut buffer = [0u8; 65536];
+    loop {
+        let count = input.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        digest.update(&buffer[..count]);
+    }
+    Ok(format!("{:x}", digest.finalize()))
 }
 
 pub fn read_config(run: &Path) -> Result<TrainConfig> {

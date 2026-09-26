@@ -85,6 +85,7 @@ impl Learner {
         config.learning_rate = 0.00001;
         // Les exports documentaires sont du texte continu, meme apres un cours de dialogue.
         config.objective = training::Objective::NextToken;
+        config.data_format = training::DataFormat::Text;
         config.warmup_steps = config.warmup_steps.min(self.steps / 10);
         if !training::train_controlled(config, &candidate, device, &|| self.stopped())? {
             return Ok(());
@@ -127,6 +128,7 @@ impl Learner {
         }
         let (model, mut config) = checkpoint::load(run, device)?;
         config.objective = training::Objective::NextToken;
+        config.data_format = training::DataFormat::Text;
         let tokenizer = crate::tokenization::load(&run.join("tokenizer.json"))?;
         let web = evaluation::evaluate_file(
             &model,

@@ -14,14 +14,27 @@ pub(super) struct Hyperparameters {
 
 impl Hyperparameters {
     pub fn new(learning_rate: f64) -> Self {
-        Self { learning_rate, beta1: 0.9, beta2: 0.999, epsilon: 1e-8, weight_decay: 0.01 }
+        Self {
+            learning_rate,
+            beta1: 0.9,
+            beta2: 0.999,
+            epsilon: 1e-8,
+            weight_decay: 0.01,
+        }
     }
 
     pub fn validate(&self) -> Result<()> {
-        ensure!(self.learning_rate.is_finite() && self.learning_rate >= 0.,
-            "Taux AdamW invalide");
-        ensure!(self.beta1 == 0.9 && self.beta2 == 0.999 && self.epsilon == 1e-8
-            && self.weight_decay == 0.01, "Hyperparametres AdamW incompatibles");
+        ensure!(
+            self.learning_rate.is_finite() && self.learning_rate >= 0.,
+            "Taux AdamW invalide"
+        );
+        ensure!(
+            self.beta1 == 0.9
+                && self.beta2 == 0.999
+                && self.epsilon == 1e-8
+                && self.weight_decay == 0.01,
+            "Hyperparametres AdamW incompatibles"
+        );
         Ok(())
     }
 }
@@ -57,7 +70,10 @@ pub(super) struct Metadata {
 
 impl Metadata {
     pub fn validate(&self) -> Result<()> {
-        ensure!(self.version == 1 && self.algorithm == "adamw", "Format AdamW incompatible");
+        ensure!(
+            self.version == 1 && self.algorithm == "adamw",
+            "Format AdamW incompatible"
+        );
         ensure!(self.step <= i32::MAX as usize, "Compteur AdamW hors limite");
         self.hyperparameters.validate()
     }

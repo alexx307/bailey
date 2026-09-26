@@ -1,5 +1,6 @@
 pub mod app;
 pub mod curriculum;
+pub mod forge;
 pub mod inference;
 pub mod knowledge;
 pub mod learning;

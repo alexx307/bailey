@@ -18,6 +18,15 @@ pub enum DeviceChoice {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Import pilote de prose francaise FineWeb2-HQ, avec budgets et provenance.
+    HfImport(crate::forge::huggingface::ImportArgs),
+    /// Retirer les passages identiques partages avec les partitions reservees.
+    CurateText {
+        #[arg(long)]
+        data: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Rechercher et conserver des pages Wikipedia avec leurs sources.
     ResearchTopic { topic: String },
     /// Collecter automatiquement ; --init-from active l'entrainement de candidates.
@@ -54,6 +63,38 @@ pub enum Command {
     },
     /// Entrainement texte ou dialogue masque ; --tiny verifie seulement le pipeline.
     Train(TrainArgs),
+    /// Continuer une seance interrompue avec son etat Adam et son planning.
+    Resume {
+        #[arg(long)]
+        run: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        data: Option<PathBuf>,
+        #[arg(long)]
+        stop_after: Option<usize>,
+    },
+    /// Construire des shards avec le tokenizer local et la provenance.
+    ForgeBuild {
+        #[arg(long)]
+        data: PathBuf,
+        #[arg(long)]
+        tokenizer: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 1_000_000)]
+        shard_tokens: usize,
+    },
+    /// Afficher les effectifs reels de chaque partition tokenisee.
+    ForgeInfo {
+        #[arg(long)]
+        data: PathBuf,
+    },
+    /// Afficher le vocabulaire reel, distinct de la capacite du modele.
+    TokenizerInfo {
+        #[arg(long, default_value = "data/core-tokenizer")]
+        tokenizer: PathBuf,
+    },
     /// Mesurer la prediction de tokens sur un fichier reserve.
     Evaluate {
         #[arg(long)]
@@ -101,6 +142,11 @@ pub enum Command {
 
 #[derive(Args)]
 pub struct TrainArgs {
+    #[arg(long, value_enum, default_value = "text")]
+    pub data_format: crate::training::DataFormat,
+    /// Arreter proprement apres cette etape globale, en gardant le planning total.
+    #[arg(long)]
+    pub stop_after: Option<usize>,
     #[arg(long, value_enum, default_value = "next-token")]
     pub objective: crate::training::Objective,
     #[arg(long, default_value = "configs/core-100m.json")]
