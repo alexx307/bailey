@@ -1,0 +1,40 @@
+use super::record::{Unit, prose};
+
+pub(super) fn append(units: &mut Vec<Unit>) {
+    prose(
+        "situations-et-observation",
+        &[
+            "Ce matin, Nora ouvre les rideaux et regarde le ciel. Elle remarque des nuages gris et choisit d'emporter son parapluie.",
+            "Dans la cuisine, Sami pose une tasse sur la table. La tasse est au-dessus du sol et à côté de son assiette.",
+            "Le chat se cache sous une chaise. Pour le voir, Léa se baisse et regarde entre les pieds de la chaise.",
+            "Un objet peut être près d'un autre ou loin de lui. La distance dépend des deux objets que l'on compare.",
+            "La droite et la gauche dépendent de l'orientation de la personne. Deux personnes face à face ne montrent pas forcément le même côté lorsqu'elles disent à droite.",
+            "Aujourd'hui désigne le jour présent. Hier désigne le jour précédent et demain le jour suivant.",
+            "Une semaine compte sept jours : lundi, mardi, mercredi, jeudi, vendredi, samedi et dimanche. Après dimanche, une nouvelle semaine commence le lundi.",
+            "Une heure contient soixante minutes et une minute contient soixante secondes. Une horloge aide à mesurer le passage du temps.",
+            "Un calendrier permet de repérer une date. Il organise les jours en semaines et en mois.",
+            "Avant de partir, Malik vérifie son sac. Il prend ses clés, ferme la porte et rejoint l'arrêt de bus.",
+            "À la bibliothèque, Inès cherche un roman. Elle lit le titre et quelques lignes du résumé pour savoir si l'histoire l'intéresse.",
+            "Au marché, une cliente compare plusieurs fruits. Elle regarde leur état et demande le prix avant de choisir.",
+            "Pour préparer une recette, on commence par lire les étapes. Cela permet de rassembler les ingrédients et les ustensiles nécessaires.",
+            "Quand de l'eau se renverse sur une table, on peut l'essuyer avec un chiffon. Le chiffon absorbe une partie du liquide.",
+            "Une plante a besoin de conditions adaptées pour grandir. La lumière, l'eau et la température ont un rôle, mais les besoins varient selon l'espèce.",
+            "Une ombre apparaît lorsqu'un objet bloque une partie de la lumière. Sa forme et sa taille changent selon la position de la source lumineuse.",
+            "Un glaçon laissé dans une pièce suffisamment chaude finit par fondre. L'eau passe alors de l'état solide à l'état liquide.",
+            "Le son provient de vibrations qui se propagent dans un milieu. Dans l'air, ces vibrations peuvent atteindre nos oreilles.",
+            "Un aimant attire certains matériaux, comme le fer. Il n'attire pas tous les métaux et n'attire pas un morceau de bois ordinaire.",
+            "La Terre tourne sur elle-même. Cette rotation explique l'alternance du jour et de la nuit pour la plupart des lieux et des périodes de l'année.",
+            "La Lune ne produit pas sa propre lumière visible comme le Soleil. Nous la voyons principalement parce qu'elle réfléchit la lumière du Soleil.",
+            "Un plan représente un lieu de façon simplifiée. Sa légende aide à comprendre les symboles utilisés.",
+            "Observer consiste à relever ce que l'on peut constater. Dire que la rue est mouillée est une observation ; affirmer qu'il a plu demande des indices supplémentaires.",
+            "Une hypothèse propose une explication possible. On cherche ensuite des observations ou des expériences pour la mettre à l'épreuve.",
+            "Deux objets peuvent avoir la même couleur et des formes différentes. Pour les comparer, on précise la propriété que l'on observe.",
+            "Un thermomètre sert à mesurer une température. Une mesure est plus utile lorsque l'on indique aussi son unité, par exemple le degré Celsius.",
+            "Pour comparer des longueurs, on utilise une même unité. Cent centimètres correspondent à un mètre.",
+            "Si une boîte contient une bille et qu'on ajoute une autre bille, elle en contient deux. Cette situation illustre l'addition 1 + 1 = 2.",
+            "Quand une information manque, il est préférable de nommer ce qui manque. Une question précise peut aider à obtenir le détail nécessaire.",
+            "Une explication peut être corrigée lorsqu'une nouvelle observation la contredit. Reconnaître une erreur permet d'améliorer ce que l'on comprend.",
+        ],
+        units,
+    );
+}

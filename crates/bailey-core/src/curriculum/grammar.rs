@@ -1,0 +1,40 @@
+use super::record::{Unit, prose};
+
+pub(super) fn append(units: &mut Vec<Unit>) {
+    prose(
+        "phrases-et-grammaire",
+        &[
+            "Une phrase écrite commence généralement par une majuscule et se termine par un signe de ponctuation. Voici un exemple : Le jardin est calme.",
+            "Le point termine une phrase déclarative. Dans « La pluie s'arrête. », le point indique la fin de la phrase.",
+            "Le point d'interrogation termine une question directe. Où est mon cahier ? est une phrase interrogative.",
+            "Le point d'exclamation peut exprimer une émotion ou une insistance. Dans Quelle belle surprise !, il accompagne une exclamation.",
+            "La virgule peut séparer les éléments d'une liste. J'emporte une pomme, une gourde et un livre.",
+            "Le sujet indique de qui ou de quoi on parle dans une phrase simple. Dans Le chien aboie, le groupe Le chien est le sujet du verbe aboie.",
+            "Le verbe s'accorde avec son sujet. On écrit L'enfant joue au singulier et Les enfants jouent au pluriel.",
+            "Au présent, le verbe être se conjugue ainsi : je suis, tu es, il est, nous sommes, vous êtes, ils sont. Le choix de la forme dépend du sujet.",
+            "Au présent, le verbe avoir se conjugue ainsi : j'ai, tu as, elle a, nous avons, vous avez, elles ont. L'apostrophe remplace le e de je devant ai.",
+            "Au présent, on écrit je parle et nous parlons. Ces deux formes appartiennent au verbe parler.",
+            "Pour raconter une action terminée, on peut employer le passé composé. Dans J'ai fermé la fenêtre, l'action est présentée comme accomplie.",
+            "L'imparfait peut décrire une habitude passée. Quand j'étais petit, je dessinais souvent après le goûter.",
+            "Le futur simple peut annoncer une action à venir. Demain, nous visiterons le musée.",
+            "Le futur proche se forme avec aller au présent suivi d'un infinitif. Je vais préparer le repas décrit une action à venir.",
+            "L'infinitif est la forme sous laquelle on trouve généralement un verbe dans le dictionnaire. Manger, finir et prendre sont des infinitifs.",
+            "Dans une négation courante à l'écrit, ne et pas entourent le verbe conjugué. Je comprends devient Je ne comprends pas.",
+            "Le déterminant accompagne un nom. Dans une lampe, une est un déterminant et lampe est un nom.",
+            "Le singulier désigne une seule unité et le pluriel en désigne plusieurs. Un livre devient des livres.",
+            "Beaucoup de noms prennent un s au pluriel, mais il existe des exceptions. Un cheval devient des chevaux.",
+            "Un adjectif s'accorde généralement en genre et en nombre avec le nom qu'il qualifie. On écrit un petit jardin et de petites maisons.",
+            "Certains adjectifs gardent la même forme au masculin et au féminin. On écrit un exercice facile et une question facile.",
+            "Le pronom peut remplacer un groupe nominal. Lina prend son manteau. Elle sort. Dans la deuxième phrase, Elle reprend Lina.",
+            "On peut employer tu pour s'adresser à une personne familière. Vous peut désigner plusieurs personnes ou marquer une relation plus formelle.",
+            "Le mot et relie souvent deux éléments. Dans une tasse et une assiette, il associe deux objets.",
+            "Le mot mais introduit souvent une opposition. Je veux sortir, mais il pleut.",
+            "Parce que introduit une cause. Je prends un parapluie parce qu'il pleut.",
+            "Dans Je lis quand la maison est calme, quand introduit une indication de temps. La phrase relie la lecture à une circonstance.",
+            "Pour demander quelque chose avec politesse, on peut employer pourriez-vous. Pourriez-vous répéter la dernière phrase, s'il vous plaît ?",
+            "Un texte cohérent relie ses phrases autour d'un sujet. Les pronoms et les mots de liaison aident le lecteur à suivre ce qui est raconté.",
+            "Relire permet de repérer des erreurs de sens ou d'accord. Il est utile de vérifier séparément les idées, les phrases et l'orthographe.",
+        ],
+        units,
+    );
+}

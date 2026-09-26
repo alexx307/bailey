@@ -1,0 +1,7 @@
+[workspace]
+members = ["crates/bailey-core"]
+default-members = ["crates/bailey-core"]
+resolver = "2"
+
+[profile.dev]
+opt-level = 1

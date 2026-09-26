@@ -1,0 +1,40 @@
+use super::record::{Unit, prose};
+
+pub(super) fn append(units: &mut Vec<Unit>) {
+    prose(
+        "lettres-et-mots",
+        &[
+            "L'alphabet français comporte vingt-six lettres : a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z. On utilise ces lettres pour écrire des mots.",
+            "Une lettre possède une forme minuscule et une forme majuscule. Par exemple, la minuscule m correspond à la majuscule M.",
+            "Le prénom Anna commence par la lettre A. On écrit habituellement la première lettre d'un prénom en majuscule.",
+            "Les lettres a, e, i, o, u et y sont habituellement classées parmi les voyelles. Les autres lettres de l'alphabet sont des consonnes.",
+            "Une lettre et un son sont deux choses différentes. Dans le mot chat, les lettres c et h forment ensemble le son que l'on entend au début du mot.",
+            "Le mot eau contient trois lettres. Ces trois lettres correspondent ensemble à une seule voyelle prononcée.",
+            "Le mot maison contient six lettres : m, a, i, s, o, n. Pour l'épeler, on donne les lettres dans leur ordre.",
+            "Un accent fait partie de l'orthographe d'un mot. Dans école, la première lettre est un e avec un accent aigu : é.",
+            "L'accent grave apparaît dans des mots comme père et là. Écrire a ou à peut changer la fonction du mot dans une phrase.",
+            "L'accent circonflexe apparaît dans forêt et fenêtre. Pour copier un mot, on conserve ses lettres et ses accents.",
+            "La cédille se place sous la lettre c dans garçon. Le caractère ç permet ici de conserver le son que l'on entend aussi dans le mot soleil.",
+            "Le tréma indique notamment que deux voyelles voisines se prononcent séparément. Dans naïf, on distingue la voyelle a de la voyelle i.",
+            "Une syllabe est un groupe de sons prononcé d'un seul mouvement de voix. Le mot vélo se prononce en deux syllabes : vé et lo.",
+            "Les lettres muettes ne se prononcent pas dans certains mots. Le t final de petit est généralement muet lorsque le mot est prononcé seul.",
+            "Deux mots peuvent se prononcer de la même manière et s'écrire différemment. Verre et vert en sont un exemple, mais ils n'ont pas le même sens.",
+            "Une apostrophe apparaît dans l'arbre. Elle marque ici la suppression de la voyelle du mot le devant une voyelle.",
+            "Un espace sépare habituellement les mots écrits. Dans la phrase Le chat dort, on compte trois mots.",
+            "Un dictionnaire explique le sens des mots. Il peut aussi indiquer leur prononciation, leur genre et des exemples d'emploi.",
+            "L'ordre alphabétique sert à ranger des mots. Abeille vient avant bateau parce que la lettre a précède la lettre b.",
+            "Quand deux mots commencent par la même lettre, on compare les lettres suivantes. Balle vient avant boule parce que a précède o.",
+            "Un synonyme est un mot dont le sens est proche de celui d'un autre mot. Joyeux et heureux peuvent être proches dans certaines phrases.",
+            "Un contraire exprime un sens opposé dans un contexte donné. Pour parler de taille, grand et petit sont des contraires.",
+            "Un mot peut avoir plusieurs sens. Une feuille peut pousser sur un arbre ou servir de support pour écrire.",
+            "Le contexte aide à comprendre un mot. Dans la phrase Je tourne la page du livre, le mot page désigne une partie d'un livre.",
+            "Un nom peut désigner un objet, une personne, un lieu ou une idée. Table, voisine, village et patience sont des noms.",
+            "Un verbe peut exprimer une action ou un état. Courir exprime une action, tandis que sembler peut introduire un état ou une apparence.",
+            "Un adjectif apporte une précision à un nom. Dans une porte bleue, le mot bleue décrit la couleur de la porte.",
+            "Pour apprendre un mot nouveau, on peut le lire dans une phrase et chercher son sens. On peut ensuite inventer une autre phrase pour vérifier son emploi.",
+            "Copier lentement une phrase aide à observer son orthographe. Il faut vérifier les accents, les espaces et la ponctuation sans oublier les petits mots.",
+            "Lire à voix haute et lire silencieusement sont deux façons de lire. Dans les deux cas, comprendre le texte demande de relier les mots à leur contexte.",
+        ],
+        units,
+    );
+}

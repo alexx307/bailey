@@ -1,0 +1,9 @@
+{
+  "language": "fr",
+  "topics": ["langue française", "mathématiques", "informatique", "physique", "biologie", "histoire", "géographie", "philosophie"],
+  "cycles": 12,
+  "pages_per_topic": 3,
+  "interval_seconds": 5,
+  "max_minutes": 30,
+  "max_library_bytes": 67108864
+}
