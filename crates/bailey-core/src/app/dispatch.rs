@@ -34,6 +34,13 @@ fn device(choice: DeviceChoice) -> Result<Device> {
 
 pub fn execute(cli: Cli) -> Result<()> {
     match cli.command {
+        Command::TokenizerMix { config, out } => crate::tokenization::mix::prepare(&config, &out),
+        Command::TokenizerAudit {
+            tokenizer,
+            baseline,
+            probes,
+            out,
+        } => crate::tokenization::audit::audit(&tokenizer, baseline.as_deref(), &probes, &out),
         Command::HfImport(args) => crate::forge::huggingface::import(&args),
         Command::CurateText { data, out } => crate::forge::curation::curate(&data, &out),
         Command::ResearchTopic { topic } => {

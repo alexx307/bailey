@@ -56,6 +56,19 @@ Ces règles viennent des demandes explicites du propriétaire du projet.
 - Un import incomplet ou interrompu ne produit pas de manifeste consommable par
   Forge. Respecter les budgets et erreurs HTTP ; ne pas intégrer automatiquement
   des textes Internet comme des faits validés.
+- Direction tokenizer du 27 septembre : un vocabulaire Byte-Level BPE commun
+  pour français, anglais, code et symboles. Comparer des candidats séparés avant
+  le gel ; ne pas router entre plusieurs tokenizers dans le modèle actuel.
+- Le mélange 70/15/15 est une hypothèse mesurée en octets UTF-8, pas un optimum
+  établi. Utiliser uniquement des sources train explicites, avec empreintes et
+  provenance. Ne pas répéter un petit corpus pour atteindre artificiellement
+  un quota. Les sondes de développement du tokenizer restent hors mélange.
+- Un audit de restitution et de fragmentation ne prouve aucune compétence de
+  langue ou de code. Le statut `candidate_not_frozen` demeure tant qu'une revue
+  sur un corpus représentatif n'a pas justifié le gel. Conserver les poids actifs
+  avec leur ancien tokenizer ; aucun remplacement silencieux des IDs.
+- Le repère de 20 tokens par paramètre sert à la planification, sans promesse de
+  compétence. Distinguer tokens du corpus et occurrences rejouées à l'entraînement.
 
 - Construire notre modèle en Rust, sans substituer un modèle préentraîné externe.
   Les poids aléatoires ne servent qu'à la première initialisation. Reprendre les

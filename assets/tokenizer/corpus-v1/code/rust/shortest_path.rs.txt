@@ -1,0 +1,81 @@
+//! Find a shortest route through an unweighted directed graph.
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
+
+type Graph<'a> = BTreeMap<&'a str, Vec<&'a str>>;
+
+fn shortest_path<'a>(
+    graph: &Graph<'a>,
+    start: &'a str,
+    destination: &'a str,
+) -> Option<Vec<&'a str>> {
+    if !graph.contains_key(start) || !graph.contains_key(destination) {
+        return None;
+    }
+
+    let mut frontier = VecDeque::from([start]);
+    let mut visited = BTreeSet::from([start]);
+    let mut previous = BTreeMap::new();
+
+    while let Some(current) = frontier.pop_front() {
+        if current == destination {
+            let mut route = vec![current];
+            let mut cursor = current;
+            while let Some(&parent) = previous.get(cursor) {
+                route.push(parent);
+                cursor = parent;
+            }
+            route.reverse();
+            return Some(route);
+        }
+
+        // The queue visits every distance before exploring the next one.
+        // Une boucle dans le graphe ne doit pas revisiter un sommet connu.
+        if let Some(neighbors) = graph.get(current) {
+            for &neighbor in neighbors {
+                if graph.contains_key(neighbor) && visited.insert(neighbor) {
+                    previous.insert(neighbor, current);
+                    frontier.push_back(neighbor);
+                }
+            }
+        }
+    }
+    None
+}
+
+fn sample_graph() -> Graph<'static> {
+    BTreeMap::from([
+        ("library", vec!["garden", "station"]),
+        ("garden", vec!["museum"]),
+        ("station", vec!["market", "library"]),
+        ("market", vec!["museum"]),
+        ("museum", vec![]),
+        ("island", vec![]),
+    ])
+}
+
+fn main() {
+    let graph = sample_graph();
+    match shortest_path(&graph, "library", "museum") {
+        Some(route) => println!("Route: {}", route.join(" -> ")),
+        None => println!("No route connects these locations."),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{sample_graph, shortest_path};
+
+    #[test]
+    fn finds_a_route_with_two_edges() {
+        let route = shortest_path(&sample_graph(), "library", "museum").unwrap();
+        assert_eq!(route, vec!["library", "garden", "museum"]);
+    }
+
+    #[test]
+    fn handles_unreachable_and_missing_vertices() {
+        let graph = sample_graph();
+        assert!(shortest_path(&graph, "library", "island").is_none());
+        assert!(shortest_path(&graph, "unknown", "museum").is_none());
+        assert_eq!(shortest_path(&graph, "garden", "garden"), Some(vec!["garden"]));
+    }
+}

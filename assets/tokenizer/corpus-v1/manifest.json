@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "id": "bailey-tokenizer-corpus-v1",
+  "origin": "assistant-authored-original",
+  "author": "assistant",
+  "status": "pilot",
+  "usage": "tokenizer-training",
+  "created_date": "2026-09-27",
+  "encoding": "UTF-8",
+  "total_bytes": 31683,
+  "category_bytes": {
+    "english": 14106,
+    "code": 17577
+  },
+  "provenance": {
+    "description": "Original English prose and standalone programming examples drafted for this local BPE segmentation experiment.",
+    "external_sources": [],
+    "pretrained_weights_used": false,
+    "generated_repetition_for_volume": false,
+    "reserved_evaluation_probes_read": false,
+    "copyright_note": "No external passage or third-party code was copied into these authored files."
+  },
+  "limits": [
+    "This small pilot corpus trains token segmentation only. It does not establish model knowledge or programming ability.",
+    "English prose is thematic and authored, not a representative sample of the language.",
+    "Programming examples are educational and bounded. Tests cover the illustrated behavior, not every possible input.",
+    "French documentation and other licensed sources must retain their separate provenance when mixed with this corpus.",
+    "Only the listed source files are training inputs; this manifest is metadata."
+  ],
+  "verification": {
+    "rust": "Three standalone programs compiled with rustc --edition=2021 -D warnings and executed; six unit tests passed.",
+    "python": "Six unittest cases passed across two standalone programs under Python 3.14.",
+    "c": "Two standalone programs compiled with gcc -x c -std=c11 -Wall -Wextra -Werror -pedantic and executed with assertions enabled."
+  },
+  "files": [
+    {
+      "path": "anglais/computing_and_work.txt",
+      "category": "english",
+      "language": "en",
+      "bytes": 3687,
+      "sha256": "19d1edda0241ec021c1195251c600c74bd4c47c2f441c1bcf908f06a685ee74f"
+    },
+    {
+      "path": "anglais/everyday.txt",
+      "category": "english",
+      "language": "en",
+      "bytes": 3279,
+      "sha256": "ffb53581092ff0a3162c616a395f744fc679967dd913a912b6bb690478605c4a"
+    },
+    {
+      "path": "anglais/reading_and_reasoning.txt",
+      "category": "english",
+      "language": "en",
+      "bytes": 3538,
+      "sha256": "e8d6a31317aa0f3653d0ed896040a80b852181d66fe4e858aaa026e960092bf3"
+    },
+    {
+      "path": "anglais/science.txt",
+      "category": "english",
+      "language": "en",
+      "bytes": 3602,
+      "sha256": "248468182d8733ca7bd94e2345aaf3115866a4b9f17600ca3e0cb77e3da1f9fe"
+    },
+    {
+      "path": "code/c/ring_buffer.c.txt",
+      "category": "code",
+      "language": "c",
+      "bytes": 2163,
+      "sha256": "ad138a34200d25c0c4eb6ab26a2b208c3aa62915308ea5db691df45cbf79410f"
+    },
+    {
+      "path": "code/c/text_statistics.c.txt",
+      "category": "code",
+      "language": "c",
+      "bytes": 2389,
+      "sha256": "833d62ef378702ca4bccdba82dee616140bfe23de100e8e6eaabdaede9774590"
+    },
+    {
+      "path": "code/python/intervals.py.txt",
+      "category": "code",
+      "language": "python",
+      "bytes": 2857,
+      "sha256": "0cf46a1f1dae6c01f807c4cbd434f37634b0a618e6eefa9691fbdc377f559bd4"
+    },
+    {
+      "path": "code/python/inventory.py.txt",
+      "category": "code",
+      "language": "python",
+      "bytes": 2680,
+      "sha256": "e7ff51a1644c1b5437522373622f4b549ebb6b60aa6a0b01ab2787964f07f840"
+    },
+    {
+      "path": "code/rust/readings.rs.txt",
+      "category": "code",
+      "language": "rust",
+      "bytes": 2464,
+      "sha256": "2d3e7d5e31529a867cf9eee53e3f9167790cc7f300f605c0520edb1b8e2835ac"
+    },
+    {
+      "path": "code/rust/shortest_path.rs.txt",
+      "category": "code",
+      "language": "rust",
+      "bytes": 2543,
+      "sha256": "f15b2824e19bc8f70ee39846a1fea8768f61b6bb0f4758a2ed2527e21a1f997c"
+    },
+    {
+      "path": "code/rust/statistics.rs.txt",
+      "category": "code",
+      "language": "rust",
+      "bytes": 2481,
+      "sha256": "c46d5ce63725c908e6998ae51416ad6ae3ae186ee0732dac31ecd3275aed0a95"
+    }
+  ]
+}

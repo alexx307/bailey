@@ -55,6 +55,10 @@ Wikipédia et un import de 100 documents FineWeb2-HQ ; ils ne constituent pas en
 un pré-entraînement substantiel. Voir les [données françaises](../data/french-foundation.md)
 et le [pilote Hugging Face](../data/huggingface.md).
 
+La [préparation du tokenizer commun](tokenizer-generaliste.md) ajoute un mélange
+train français/anglais/code et un audit de restitution/fragmentation sur sondes
+de développement. Les candidats restent distincts du tokenizer des poids actifs.
+
 Suite : ingestion Parquet avec projection du texte et révision figée, traitement
 en flux et déduplication à grande échelle, corpus élargi et revu, choix définitif
 du tokenizer, comparaison locale puis conditionnement cloud. BF16, accumulation,

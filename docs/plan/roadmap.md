@@ -26,6 +26,9 @@ shards vérifiés, avec validation et test séparés. Ce volume reste insuffisan
 pour affirmer un pré-entraînement français généraliste.
 
 Former le tokenizer définitif sur ce corpus d'entraînement ; figer ses IDs.
+Un seul tokenizer commun français/anglais/code est visé. Le mélange et l'audit
+des candidats sont implémentés ; leur gel exige encore un corpus représentatif.
+Voir le [plan du tokenizer généraliste](tokenizer-generaliste.md).
 Comparer d'abord plusieurs essais courts, mesurer tokens/seconde et VRAM,
 puis calculer le budget réaliste d'une séance longue. Ne pas annoncer une durée
 d'apprentissage ou une maîtrise générale sans ces mesures.

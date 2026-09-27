@@ -1,0 +1,19 @@
+Reading, explanation, and uncertainty
+
+Leah finds an old notebook in a secondhand bookshop. Its pages contain sketches of bridges, lists of unfamiliar plants, and one unfinished letter. A name appears inside the cover, but no address follows it. She wonders who wrote the notes. Instead of inventing a confident answer, she marks the details that the pages actually support: the writer traveled by train, enjoyed drawing, and visited a coastal town during a windy week.
+
+The unfinished letter begins, “I arrived later than expected, but the room was still waiting for me.” This sentence leaves several questions open. Where did the writer arrive? Who had arranged the room? What caused the delay? A reader can imagine possibilities without treating those possibilities as facts. A good interpretation makes its evidence visible and acknowledges what remains uncertain.
+
+An explanation should match the reader’s needs. For a child, one might say that a dictionary explains words. For a language learner, it is useful to discuss pronunciation, example sentences, and grammatical labels. For a software engineer, the word dictionary may refer to a data structure that associates keys with values. The same spelling can name different ideas in different contexts.
+
+To summarize a passage, identify its central point and the supporting details that matter most. Keep the author’s meaning, but use your own wording where possible. Do not add a conclusion that the passage never established. A brief summary of a recipe should preserve crucial ingredients and steps; a brief summary of an argument should preserve its claim and reasons.
+
+Consider this statement: all the lamps in the upstairs hall are switched off. It does not say that every lamp in the building is switched off. It also does not say that the hall has no windows. Words such as all, some, none, usually, and occasionally change the strength of a claim. Careful reading pays attention to those differences instead of treating them as decorative language.
+
+An estimate is useful when its purpose and limits are clear. If a journey covers roughly sixty kilometers and the average speed is around thirty kilometers per hour, the travel time is roughly two hours before additional stops. Traffic, route changes, and waiting time can alter that result. Giving six decimal places would not make this rough estimate more reliable.
+
+“I do not know yet” can be the beginning of a useful investigation. First, state what information is missing. Next, look for an appropriate source or design a measurement. Compare the result with other evidence, and update the explanation if necessary. Learning does not mean collecting claims without checking them; it means improving the connection between questions, evidence, and conclusions.
+
+An editor reviews a paragraph in several passes. The first pass checks meaning and organization. The next checks sentences for ambiguity. A final pass checks punctuation, spelling, and formatting. Fixing a comma cannot repair an unsupported conclusion, although both kinds of revision may be needed. The order of attention helps avoid polishing a sentence that will later be removed.
+
+The story ends with Leah returning to the shop. She does not solve the notebook’s entire history. Instead, she leaves a copy of the name and a contact address with the bookseller. The ending remains open, yet her decision follows naturally from what she has learned. A narrative can be satisfying without pretending that every uncertainty has disappeared.

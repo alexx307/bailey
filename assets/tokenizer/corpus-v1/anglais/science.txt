@@ -1,0 +1,19 @@
+Questions about the physical world
+
+A shadow forms when an object blocks light that would otherwise reach a surface. Its size and shape depend on the positions of the light source, the object, and the surface. Move a small lamp closer to your hand and the shadow on a distant wall may grow larger. The edges can become softer when the source has a noticeable width rather than acting like a single point.
+
+Water can be present as ice, liquid water, or water vapor. Heating does not always cause an immediate rise in temperature: energy can also be involved in a change of state. When discussing a boiling point, the surrounding pressure matters. A temperature measurement should therefore include a unit and enough context to make the number meaningful. Writing “twenty” alone is less informative than writing “twenty degrees Celsius.”
+
+A seed contains a young plant and a supply of stored material. Under suitable conditions, it begins to grow. Roots generally explore the soil, while a shoot develops leaves that can use light in photosynthesis. The growth of one seedling cannot tell us everything about a species. To compare conditions, an experiment needs several plants, a clear procedure, and observations collected in the same way.
+
+An observer might notice that a metal spoon feels colder than a wooden spoon even when both have been in the same room overnight. Touch is affected by how quickly heat moves between the skin and the material, so the sensation is not a direct reading of the objects’ temperatures. A thermometer can help separate the measurement from the impression.
+
+In an electrical circuit, voltage, current, and resistance describe different quantities. A simple resistor may approximately follow Ohm’s law within an appropriate operating range: V = I × R. The equation uses volts, amperes, and ohms consistently. It does not imply that every electronic component behaves like an ideal resistor under every condition. A diagram and a list of assumptions help explain what the calculation represents.
+
+Earth rotates, and it also travels around the Sun. Day and night result from the rotation. Seasons are associated mainly with the tilt of Earth’s rotation axis relative to its orbit, which changes the angle and duration of sunlight across the year. A model made from a ball and a lamp is useful for illustration, but the distances and sizes in that model are usually not drawn to the same scale.
+
+A hypothesis proposes an explanation that can be examined. A prediction describes what we expect to observe under specified conditions if the explanation is useful. Evidence may support a hypothesis, weaken it, or reveal that the experiment was not capable of distinguishing alternatives. “We did not detect a difference” is not always equivalent to “there is no difference.” Measurement precision and sample size affect what can be inferred.
+
+Numbers deserve careful labels. A length of 250 millimeters equals 25 centimeters, or 0.25 meters. An area is measured in square units, and a volume in cubic units. Doubling every side of a cube multiplies its volume by eight. Keeping units alongside values makes many mistakes visible before a calculation reaches its final line.
+
+The notebook records an observation separately from an interpretation: “The surface became cloudy after three minutes” describes what was seen. “A reaction produced tiny suspended particles” suggests an explanation. Both statements may be useful, but they play different roles. Clear records allow another person to repeat the procedure and question the interpretation.

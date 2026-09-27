@@ -1,0 +1,9 @@
+{
+  "language": "en",
+  "topics": ["English grammar", "communication", "education", "literature", "geography", "water", "plants", "mathematics", "computer science", "music"],
+  "cycles": 1,
+  "pages_per_topic": 3,
+  "interval_seconds": 1,
+  "max_minutes": 10,
+  "max_library_bytes": 20000000
+}

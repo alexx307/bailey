@@ -1,0 +1,81 @@
+//! Descriptive statistics for a small in-memory sample.
+//! Exemple autonome : rustc statistics.rs puis exécuter le programme.
+
+#[derive(Debug, PartialEq)]
+struct Summary {
+    count: usize,
+    minimum: f64,
+    maximum: f64,
+    mean: f64,
+    median: f64,
+    population_variance: f64,
+}
+
+fn summarize(values: &[f64]) -> Result<Summary, &'static str> {
+    if values.is_empty() {
+        return Err("the sample must not be empty");
+    }
+    if values.iter().any(|value| !value.is_finite()) {
+        return Err("every observation must be finite");
+    }
+
+    // Welford's update avoids subtracting two large squared sums.
+    // Les données restent empruntées ; seule la médiane demande une copie.
+    let mut mean = 0.0;
+    let mut squared_deviations = 0.0;
+    for (index, &value) in values.iter().enumerate() {
+        let delta = value - mean;
+        mean += delta / (index + 1) as f64;
+        squared_deviations += delta * (value - mean);
+    }
+    if !mean.is_finite() || !squared_deviations.is_finite() {
+        return Err("the calculation exceeded the floating-point range");
+    }
+
+    let mut sorted = values.to_vec();
+    sorted.sort_by(f64::total_cmp);
+    let middle = sorted.len() / 2;
+    let median = if sorted.len() % 2 == 0 {
+        sorted[middle - 1] / 2.0 + sorted[middle] / 2.0
+    } else {
+        sorted[middle]
+    };
+
+    Ok(Summary {
+        count: values.len(),
+        minimum: sorted[0],
+        maximum: sorted[sorted.len() - 1],
+        mean,
+        median,
+        population_variance: squared_deviations / values.len() as f64,
+    })
+}
+
+fn main() -> Result<(), &'static str> {
+    let readings = [18.0, 21.0, 19.0, 22.0, 20.0];
+    let summary = summarize(&readings)?;
+    println!("Observations: {}", summary.count);
+    println!("Range: {:.1} to {:.1}", summary.minimum, summary.maximum);
+    println!("Mean: {:.2}; median: {:.2}", summary.mean, summary.median);
+    println!("Population variance: {:.3}", summary.population_variance);
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::summarize;
+
+    #[test]
+    fn symmetric_sample_has_expected_values() {
+        let result = summarize(&[2.0, 4.0, 6.0]).unwrap();
+        assert_eq!(result.mean, 4.0);
+        assert_eq!(result.median, 4.0);
+        assert!((result.population_variance - 8.0 / 3.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn invalid_samples_are_rejected() {
+        assert!(summarize(&[]).is_err());
+        assert!(summarize(&[f64::NAN]).is_err());
+    }
+}

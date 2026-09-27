@@ -55,6 +55,12 @@ fn only_explicit_training_file_is_read_and_fingerprinted() {
     // Invalid UTF-8 would fail tokenizer training if either holdout were read.
     fs::write(directory.path().join("validation.txt"), [0xff, 0xfe]).unwrap();
     fs::write(directory.path().join("test.txt"), [0xff, 0xfe]).unwrap();
+    let provenance = serde_json::to_vec(&serde_json::json!({
+        "train_sha256":format!("{:x}", Sha256::digest(CORPUS.as_bytes())),
+        "origin":"original unit fixture"
+    }))
+    .unwrap();
+    fs::write(directory.path().join("manifest.json"), &provenance).unwrap();
     train(&input, &out, 512).unwrap();
     let manifest: serde_json::Value =
         serde_json::from_slice(&fs::read(out.join("manifest.json")).unwrap()).unwrap();
@@ -64,6 +70,18 @@ fn only_explicit_training_file_is_read_and_fingerprinted() {
     );
     assert_eq!(manifest["input_bytes"], CORPUS.len());
     assert_eq!(manifest["requested_vocab_size"], 512);
+    assert_eq!(manifest["status"], "candidate_not_frozen");
+    assert_eq!(
+        fs::read(out.join("source-manifest.json")).unwrap(),
+        provenance
+    );
+    assert_eq!(
+        manifest["tokenizer_sha256"],
+        format!(
+            "{:x}",
+            Sha256::digest(fs::read(out.join("tokenizer.json")).unwrap())
+        )
+    );
     assert_eq!(
         manifest["actual_vocab_size"],
         load(&out).unwrap().get_vocab_size(true)
@@ -87,5 +105,20 @@ fn invalid_input_does_not_create_an_output() {
     assert!(train(&input, &out, 512).is_err());
     fs::write(&input, CORPUS).unwrap();
     assert!(train(&input, &out, 258).is_err());
+    assert!(!out.exists());
+}
+
+#[test]
+fn stale_mixture_provenance_is_rejected_before_training() {
+    let directory = tempfile::tempdir().unwrap();
+    let input = directory.path().join("train.txt");
+    let out = directory.path().join("tokenizer");
+    fs::write(&input, CORPUS).unwrap();
+    fs::write(
+        directory.path().join("manifest.json"),
+        r#"{"train_sha256":"obsolete"}"#,
+    )
+    .unwrap();
+    assert!(train(&input, &out, 512).is_err());
     assert!(!out.exists());
 }

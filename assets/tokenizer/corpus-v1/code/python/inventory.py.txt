@@ -1,0 +1,78 @@
+"""An in-memory stock ledger with exact decimal prices.
+
+This example performs no file writes and makes no network requests.
+Les montants utilisent Decimal pour éviter les arrondis binaires implicites.
+"""
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
+import unittest
+
+
+@dataclass(frozen=True)
+class Product:
+    name: str
+    unit_price: Decimal
+    quantity: int
+
+
+def read_product(record: str) -> Product:
+    fields = [part.strip() for part in record.split("|")]
+    if len(fields) != 3:
+        raise ValueError("expected name | price | quantity")
+    name, raw_price, raw_quantity = fields
+    if not name:
+        raise ValueError("a product needs a name")
+    try:
+        price = Decimal(raw_price)
+        quantity = int(raw_quantity)
+    except (InvalidOperation, ValueError) as error:
+        raise ValueError("invalid price or quantity") from error
+    if not price.is_finite() or price < 0:
+        raise ValueError("price must be finite and nonnegative")
+    if price.as_tuple().exponent < -2:
+        raise ValueError("price must have at most two decimal places")
+    if quantity < 0:
+        raise ValueError("quantity must be nonnegative")
+    return Product(name, price, quantity)
+
+
+def stock_value(products: list[Product]) -> Decimal:
+    return sum(
+        (product.unit_price * product.quantity for product in products),
+        start=Decimal("0.00"),
+    )
+
+
+def format_report(products: list[Product]) -> str:
+    rows = ["Product                 Quantity    Unit price"]
+    for product in sorted(products, key=lambda item: item.name.casefold()):
+        rows.append(
+            f"{product.name:<24}{product.quantity:>8}"
+            f"{product.unit_price:>14.2f}"
+        )
+    rows.append(f"Total stock value: {stock_value(products):.2f}")
+    return "\n".join(rows)
+
+
+class InventoryTests(unittest.TestCase):
+    def test_decimal_total(self) -> None:
+        products = [read_product("Pencil|0.10|3"), read_product("Book|2.35|2")]
+        self.assertEqual(stock_value(products), Decimal("5.00"))
+
+    def test_invalid_records(self) -> None:
+        for record in ("|1.00|2", "Pen|NaN|1", "Pen|1.234|1", "Pen|2.00|-1"):
+            with self.subTest(record=record), self.assertRaises(ValueError):
+                read_product(record)
+
+    def test_empty_stock_has_zero_value(self) -> None:
+        self.assertEqual(stock_value([]), Decimal("0.00"))
+
+
+if __name__ == "__main__":
+    example = [
+        read_product("Notebook | 3.25 | 8"),
+        read_product("Envelope | 0.15 | 24"),
+        read_product("Ruler | 1.80 | 5"),
+    ]
+    print(format_report(example))
+    unittest.main(argv=["inventory"], exit=False)

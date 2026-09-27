@@ -1,5 +1,7 @@
 //! Un tokenizer appris uniquement sur un corpus local d'entraînement.
 
+pub mod audit;
+pub mod mix;
 mod training;
 
 use std::path::Path;

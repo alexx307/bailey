@@ -1,0 +1,79 @@
+/* A fixed-capacity FIFO queue for integers. No dynamic allocation is needed.
+ * Compile as C11. Les assertions vérifient les transitions de la petite file.
+ */
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+
+enum { QUEUE_CAPACITY = 4 };
+
+typedef struct {
+    int values[QUEUE_CAPACITY];
+    size_t head;
+    size_t count;
+} Queue;
+
+static void queue_initialize(Queue *queue) {
+    *queue = (Queue){0};
+}
+
+static bool queue_push(Queue *queue, int value) {
+    if (queue->count == QUEUE_CAPACITY) {
+        return false;
+    }
+    const size_t tail = (queue->head + queue->count) % QUEUE_CAPACITY;
+    queue->values[tail] = value;
+    ++queue->count;
+    return true;
+}
+
+static bool queue_pop(Queue *queue, int *value) {
+    if (queue->count == 0) {
+        return false;
+    }
+    *value = queue->values[queue->head];
+    queue->head = (queue->head + 1) % QUEUE_CAPACITY;
+    --queue->count;
+    return true;
+}
+
+static bool queue_peek(const Queue *queue, int *value) {
+    if (queue->count == 0) {
+        return false;
+    }
+    *value = queue->values[queue->head];
+    return true;
+}
+
+int main(void) {
+    Queue queue;
+    int value = -1;
+    queue_initialize(&queue);
+    assert(!queue_pop(&queue, &value));
+    assert(value == -1);
+
+    assert(queue_push(&queue, 12));
+    assert(queue_push(&queue, 27));
+    assert(queue_push(&queue, 35));
+    assert(queue_push(&queue, 48));
+    assert(!queue_push(&queue, 99));
+    assert(queue_pop(&queue, &value) && value == 12);
+    assert(queue_pop(&queue, &value) && value == 27);
+
+    /* These pushes wrap around to storage that has become available. */
+    assert(queue_push(&queue, 56));
+    assert(queue_push(&queue, 63));
+    assert(queue_peek(&queue, &value) && value == 35);
+    assert(queue.count == QUEUE_CAPACITY);
+
+    const int expected[] = {35, 48, 56, 63};
+    for (size_t index = 0; index < QUEUE_CAPACITY; ++index) {
+        assert(queue_pop(&queue, &value));
+        assert(value == expected[index]);
+        printf("Removed %d; %zu item(s) remain.\n", value, queue.count);
+    }
+    assert(!queue_peek(&queue, &value));
+    assert(queue.count == 0);
+    return 0;
+}

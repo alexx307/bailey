@@ -18,6 +18,24 @@ pub enum DeviceChoice {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Preparer un melange train francais/anglais/code pour un candidat tokenizer.
+    TokenizerMix {
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Mesurer restitution et fragmentation sur des sondes de developpement.
+    TokenizerAudit {
+        #[arg(long)]
+        tokenizer: PathBuf,
+        #[arg(long)]
+        baseline: Option<PathBuf>,
+        #[arg(long, default_value = "assets/tokenizer/probes-v1.json")]
+        probes: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Import pilote de prose francaise FineWeb2-HQ, avec budgets et provenance.
     HfImport(crate::forge::huggingface::ImportArgs),
     /// Retirer les passages identiques partages avec les partitions reservees.

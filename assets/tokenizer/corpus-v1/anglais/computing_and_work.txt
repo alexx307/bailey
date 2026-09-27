@@ -1,0 +1,19 @@
+Computers, collaboration, and clear instructions
+
+A file has a name, a location, and a sequence of bytes. Its extension can suggest a format, but an extension alone does not prove what the file contains. A text editor, an image viewer, and a spreadsheet application interpret bytes in different ways. When a program reports an unreadable file, useful questions include whether the path is correct, whether the format is supported, and whether the operation has permission to read it.
+
+Unicode assigns code points to characters, while UTF-8 represents those code points using bytes. The number of bytes in a string is therefore not necessarily the number of visible symbols. An accented letter, a combining mark, or an emoji can make simplistic counting assumptions fail. Software should choose a counting method that matches the actual task: storage size, code point processing, or user-visible text boundaries.
+
+A network request has a destination, a method, and often some headers or a body. The response includes a status and may include data. A timeout means that an operation did not complete within its allowed interval; it does not, by itself, reveal every event on the remote server. Retrying a read is different from retrying an operation that may already have changed something. Reliable software makes that distinction explicit.
+
+The team receives a report: “The application crashes when I import a blank file.” The report includes the application version, the operating system, the smallest input that reproduces the behavior, and the error message. This information makes investigation easier. A useful fix explains the cause, adds the expected handling, and verifies the behavior that originally failed.
+
+Version control records changes to project files. A small, focused change is often easier to review than a collection of unrelated edits. A reviewer asks whether the implementation matches the intended behavior, whether failure cases are handled, and whether the explanation is accurate. Review is a shared attempt to improve the work, not a competition to find the largest number of criticisms.
+
+An interface should make ordinary actions easy to discover. A button labeled “Save draft” communicates more than one labeled “Proceed.” If saving can fail, the application should explain the failure and retain the user’s work where possible. Progress indicators are useful when they reflect real progress. A number that moves smoothly without representing measured work can create misleading expectations.
+
+The project board contains four columns: planned, in progress, under review, and complete. Each task names an outcome and a responsible person. “Improve things” is difficult to verify, whereas “Show a helpful message when the configuration file is missing” has a concrete result. Tasks may change after investigation, but the board should reflect those changes rather than conceal them.
+
+Backups and synchronization solve related but different problems. Synchronization makes selected locations agree. A backup preserves a recoverable version from an earlier time. If an accidental deletion immediately synchronizes everywhere, a retained backup may still provide a way to recover the file. A backup process is more useful when recovery has actually been tested.
+
+Configuration values should be validated before expensive work begins. A negative batch size, an empty destination, or an unsupported option should produce a specific explanation. Defaults can make a tool convenient, but important assumptions should remain visible. A program that says exactly what it is about to process is easier to understand than one that silently guesses.

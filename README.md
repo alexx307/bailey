@@ -179,6 +179,39 @@ masqué. Le prototype charge la partition en RAM et n'est pas encore un lecteur
 en flux pour des milliards de tokens. Aucun de ces pilotes ne remplace un
 pré-entraînement substantiel ni une évaluation des compétences.
 
+## Préparer le tokenizer commun
+
+Un seul tokenizer commun est visé pour le français, l'anglais et le code.
+Le [plan du tokenizer généraliste](docs/plan/tokenizer-generaliste.md) précise
+la comparaison de candidats avant gel, la compatibilité des IDs et le budget
+de données. Apprendre ce découpage utilise le CPU et ne modifie pas les poids
+du modèle de langage.
+
+Après les collectes françaises et anglaises documentées, le script prépare une
+liste explicite de sources avec empreintes et un snapshot du code local :
+
+```powershell
+.\tools\tokenizer\prepare-inputs.ps1 -Out data/tokenizer-inputs-NOUVEAU
+& target/debug/bailey-core.exe tokenizer-mix `
+  --config data/tokenizer-inputs-NOUVEAU/mix.json --out data/tokenizer-mix-NOUVEAU
+& target/debug/bailey-core.exe tokenizer-train `
+  --train data/tokenizer-mix-NOUVEAU/train.txt `
+  --out data/tokenizer-candidate-NOUVEAU --vocab-size 32000
+& target/debug/bailey-core.exe tokenizer-audit `
+  --tokenizer data/tokenizer-candidate-NOUVEAU `
+  --baseline runs/core-dialogue-sft-20260926-v1/model/tokenizer.json `
+  --out runs/tokenizer-audit-NOUVEAU.json
+```
+
+Le mélange vise 70 % français, 15 % anglais et 15 % code en octets sources,
+sans répétition pour compenser un manque. Il conserve offsets, provenance et
+empreintes ; ce pilote n'effectue pas de déduplication sémantique globale.
+L'audit compare les mêmes 32 sondes de développement dans huit domaines,
+la restitution exacte, les 256 symboles ByteLevel et les marqueurs. Il ne
+promet pas une meilleure conversation. Les nouveaux IDs exigent une expérience
+de modèle compatible ; le candidat ne remplace pas automatiquement le tokenizer
+des checkpoints existants.
+
 ## Lecture Internet
 
 ```powershell

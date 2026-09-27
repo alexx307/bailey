@@ -1,0 +1,78 @@
+"""Normalize half-open integer intervals without changing the input.
+
+The interval [start, end) includes start and excludes end. Two intervals
+that only touch can safely be merged when representing a covered region.
+"""
+from dataclasses import dataclass
+from collections.abc import Iterable
+import unittest
+
+
+@dataclass(frozen=True, order=True)
+class Interval:
+    start: int
+    end: int
+
+    def __post_init__(self) -> None:
+        if self.end < self.start:
+            raise ValueError("interval end precedes its start")
+
+    @property
+    def length(self) -> int:
+        return self.end - self.start
+
+
+def merge_intervals(intervals: Iterable[Interval]) -> list[Interval]:
+    ordered = sorted(interval for interval in intervals if interval.length)
+    merged: list[Interval] = []
+    for current in ordered:
+        if merged and current.start <= merged[-1].end:
+            previous = merged[-1]
+            merged[-1] = Interval(previous.start, max(previous.end, current.end))
+        else:
+            merged.append(current)
+    return merged
+
+
+def uncovered_regions(bounds: Interval, occupied: Iterable[Interval]) -> list[Interval]:
+    # Clip first: intervals outside the requested region do not create gaps.
+    # Le curseur avance seulement dans les bornes demandées.
+    clipped = (
+        Interval(max(bounds.start, item.start), min(bounds.end, item.end))
+        for item in occupied
+        if item.end > bounds.start and item.start < bounds.end
+    )
+    cursor = bounds.start
+    gaps = []
+    for item in merge_intervals(clipped):
+        if cursor < item.start:
+            gaps.append(Interval(cursor, item.start))
+        cursor = max(cursor, item.end)
+    if cursor < bounds.end:
+        gaps.append(Interval(cursor, bounds.end))
+    return gaps
+
+
+class IntervalTests(unittest.TestCase):
+    def test_overlap_and_adjacency(self) -> None:
+        source = [Interval(8, 12), Interval(2, 5), Interval(5, 9)]
+        self.assertEqual(merge_intervals(source), [Interval(2, 12)])
+        self.assertEqual(source[0], Interval(8, 12))
+
+    def test_clipped_gaps(self) -> None:
+        occupied = [Interval(-5, 3), Interval(7, 15)]
+        self.assertEqual(uncovered_regions(Interval(0, 10), occupied), [Interval(3, 7)])
+
+    def test_empty_and_invalid_intervals(self) -> None:
+        self.assertEqual(merge_intervals([Interval(4, 4)]), [])
+        self.assertEqual(uncovered_regions(Interval(4, 4), [Interval(1, 8)]), [])
+        with self.assertRaises(ValueError):
+            Interval(9, 2)
+
+
+if __name__ == "__main__":
+    working_day = Interval(9 * 60, 17 * 60)
+    meetings = [Interval(600, 645), Interval(630, 690), Interval(840, 900)]
+    for gap in uncovered_regions(working_day, meetings):
+        print(f"Free from minute {gap.start} to minute {gap.end}: {gap.length} minutes")
+    unittest.main(argv=["intervals"], exit=False)

@@ -1,0 +1,74 @@
+/* Count bytes and ASCII whitespace-delimited words in a byte sequence.
+ * This does not count Unicode characters or infer natural-language words.
+ */
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    size_t bytes;
+    size_t words;
+    size_t lines;
+    size_t digit_bytes;
+    size_t uppercase_ascii;
+} TextStatistics;
+
+static bool ascii_space(unsigned char value) {
+    return value == ' ' || value == '\t' || value == '\n' ||
+           value == '\r' || value == '\f' || value == '\v';
+}
+
+static TextStatistics analyze(const unsigned char *data, size_t length) {
+    TextStatistics result = {.bytes = length};
+    bool inside_word = false;
+    for (size_t index = 0; index < length; ++index) {
+        const unsigned char value = data[index];
+        if (value == '\n') {
+            ++result.lines;
+        }
+        if (value >= '0' && value <= '9') {
+            ++result.digit_bytes;
+        }
+        if (value >= 'A' && value <= 'Z') {
+            ++result.uppercase_ascii;
+        }
+        if (ascii_space(value)) {
+            inside_word = false;
+        } else if (!inside_word) {
+            ++result.words;
+            inside_word = true;
+        }
+    }
+    /* Une dernière ligne sans saut final compte aussi comme une ligne. */
+    if (length > 0 && data[length - 1] != '\n') {
+        ++result.lines;
+    }
+    return result;
+}
+
+static void verify_examples(void) {
+    const TextStatistics empty = analyze(NULL, 0);
+    assert(empty.bytes == 0 && empty.words == 0 && empty.lines == 0);
+
+    const unsigned char sample[] = "Two words\nAnd 17 more";
+    const TextStatistics result = analyze(sample, sizeof sample - 1);
+    assert(result.words == 5);
+    assert(result.lines == 2);
+    assert(result.digit_bytes == 2);
+    assert(result.uppercase_ascii == 2);
+
+    const unsigned char terminated[] = "one\n";
+    assert(analyze(terminated, sizeof terminated - 1).lines == 1);
+}
+
+int main(void) {
+    verify_examples();
+    const char *text = "Morning report\n3 parcels arrived.\n";
+    const TextStatistics result = analyze((const unsigned char *)text, strlen(text));
+    printf("Bytes: %zu\nWords: %zu\nLines: %zu\n", result.bytes, result.words, result.lines);
+    printf("ASCII digits: %zu; uppercase ASCII letters: %zu\n",
+           result.digit_bytes, result.uppercase_ascii);
+    return 0;
+}
