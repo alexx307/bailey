@@ -1,7 +1,9 @@
 //! Import pilote borne via l'API publique des lignes. Aucun poids externe.
+mod books;
 mod client;
 mod quality;
 use anyhow::{Result, ensure};
+pub use books::{BookImportArgs, import as import_books};
 use clap::Args;
 use serde_json::json;
 use std::{
@@ -46,7 +48,11 @@ pub fn import(args: &ImportArgs) -> Result<()> {
             && (1..=60).contains(&args.max_minutes),
         "Budgets hors limites du pilote"
     );
-    let mut reader = client::Reader::new(args.max_download_mb * 1024 * 1024)?;
+    let mut reader = client::Reader::new(
+        client::DATASET,
+        client::CONFIG,
+        args.max_download_mb * 1024 * 1024,
+    )?;
     fs::create_dir_all(args.out.parent().unwrap_or(std::path::Path::new(".")))?;
     fs::create_dir(&args.out)?;
     let mut files = Vec::new();
@@ -72,7 +78,7 @@ pub fn import(args: &ImportArgs) -> Result<()> {
                 reason = "time_budget";
                 break;
             }
-            let page = reader.page(
+            let page = reader.page::<client::Document>(
                 args.offset + visited as u64,
                 (args.rows - visited).min(args.page_size),
             )?;

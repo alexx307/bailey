@@ -42,6 +42,7 @@ pub fn execute(cli: Cli) -> Result<()> {
             out,
         } => crate::tokenization::audit::audit(&tokenizer, baseline.as_deref(), &probes, &out),
         Command::HfImport(args) => crate::forge::huggingface::import(&args),
+        Command::HfImportBooks(args) => crate::forge::huggingface::import_books(&args),
         Command::CurateText { data, out } => crate::forge::curation::curate(&data, &out),
         Command::ResearchTopic { topic } => {
             for article in

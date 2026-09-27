@@ -38,6 +38,8 @@ pub enum Command {
     },
     /// Import pilote de prose francaise FineWeb2-HQ, avec budgets et provenance.
     HfImport(crate::forge::huggingface::ImportArgs),
+    /// Import pilote de livres francais du domaine public (PleIAs/French-PD-Books).
+    HfImportBooks(crate::forge::huggingface::BookImportArgs),
     /// Retirer les passages identiques partages avec les partitions reservees.
     CurateText {
         #[arg(long)]

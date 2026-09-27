@@ -1,22 +1,23 @@
 use anyhow::{Result, ensure};
 use reqwest::{blocking::Client, redirect::Policy};
 use serde::Deserialize;
+use serde::de::DeserializeOwned;
 use std::{io::Read, time::Duration};
 
 pub const DATASET: &str = "epfml/FineWeb2-HQ";
 pub const CONFIG: &str = "fra_Latn";
 
 #[derive(Deserialize)]
-pub struct Page {
-    pub rows: Vec<Row>,
+pub struct Page<T> {
+    pub rows: Vec<Row<T>>,
     pub num_rows_total: u64,
     #[serde(default)]
     pub partial: bool,
 }
 #[derive(Deserialize)]
-pub struct Row {
+pub struct Row<T> {
     pub row_idx: u64,
-    pub row: Document,
+    pub row: T,
     #[serde(default)]
     pub truncated_cells: Vec<serde_json::Value>,
 }
@@ -32,13 +33,17 @@ pub struct Document {
     pub date: String,
     pub dump: String,
 }
+/// Client generique pour l'API publique "rows" ; le dataset et sa config sont
+/// fixes a la construction, jamais choisis par une entree utilisateur libre.
 pub struct Reader {
     http: Client,
+    dataset: &'static str,
+    config: &'static str,
     pub downloaded: u64,
     max_download: u64,
 }
 impl Reader {
-    pub fn new(max_download: u64) -> Result<Self> {
+    pub fn new(dataset: &'static str, config: &'static str, max_download: u64) -> Result<Self> {
         Ok(Self {
             http: Client::builder()
                 .https_only(true)
@@ -46,18 +51,20 @@ impl Reader {
                 .timeout(Duration::from_secs(40))
                 .user_agent("BaileyForge/0.1 (https://github.com/alexx307/bailey)")
                 .build()?,
+            dataset,
+            config,
             downloaded: 0,
             max_download,
         })
     }
-    pub fn page(&mut self, offset: u64, length: usize) -> Result<Page> {
+    pub fn page<T: DeserializeOwned>(&mut self, offset: u64, length: usize) -> Result<Page<T>> {
         ensure!((1..=100).contains(&length), "Taille de page invalide");
         let response = self
             .http
             .get("https://datasets-server.huggingface.co/rows")
             .query(&[
-                ("dataset", DATASET),
-                ("config", CONFIG),
+                ("dataset", self.dataset),
+                ("config", self.config),
                 ("split", "train"),
                 ("offset", &offset.to_string()),
                 ("length", &length.to_string()),
@@ -78,7 +85,7 @@ impl Reader {
             bytes.len() as u64 <= limit,
             "Reponse ou budget trop grand ; reduire le nombre de lignes par requete"
         );
-        let page: Page = serde_json::from_slice(&bytes)?;
+        let page: Page<T> = serde_json::from_slice(&bytes)?;
         ensure!(!page.partial, "Apercu partiel refuse");
         ensure!(page.rows.len() <= length, "Reponse hors limite de lignes");
         for (i, row) in page.rows.iter().enumerate() {
