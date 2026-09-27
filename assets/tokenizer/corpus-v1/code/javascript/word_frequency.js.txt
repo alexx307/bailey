@@ -1,0 +1,30 @@
+function wordFrequency(text) {
+  const counts = new Map();
+  const words = text.toLowerCase().match(/[a-zà-ÿ']+/g) || [];
+  for (const word of words) {
+    counts.set(word, (counts.get(word) || 0) + 1);
+  }
+  return counts;
+}
+
+function topWords(counts, limit) {
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit);
+}
+
+function assertEqual(actual, expected, label) {
+  const same = JSON.stringify(actual) === JSON.stringify(expected);
+  if (!same) {
+    throw new Error(`${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
+}
+
+const sample = "the cat sat on the mat, the cat was happy";
+const counts = wordFrequency(sample);
+assertEqual(counts.get("the"), 3, "count of the");
+assertEqual(counts.get("cat"), 2, "count of cat");
+assertEqual(topWords(counts, 2), [["the", 3], ["cat", 2]], "top two words");
+assertEqual(wordFrequency("").size, 0, "empty text has no words");
+
+console.log("word_frequency: all assertions passed");

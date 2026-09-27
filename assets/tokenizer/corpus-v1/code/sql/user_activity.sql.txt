@@ -1,0 +1,43 @@
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    handle TEXT NOT NULL UNIQUE,
+    joined_on TEXT NOT NULL
+);
+
+CREATE TABLE sessions (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    started_at TEXT NOT NULL,
+    duration_seconds INTEGER NOT NULL CHECK (duration_seconds >= 0)
+);
+
+INSERT INTO users (id, handle, joined_on) VALUES
+    (1, 'maelle', '2026-01-10'),
+    (2, 'noe', '2026-02-03'),
+    (3, 'ines', '2026-02-20');
+
+INSERT INTO sessions (id, user_id, started_at, duration_seconds) VALUES
+    (1, 1, '2026-09-01', 600),
+    (2, 1, '2026-09-02', 300),
+    (3, 2, '2026-09-01', 1200),
+    (4, 3, '2026-09-03', 45);
+
+-- Temps total connecte par utilisateur, du plus actif au moins actif.
+SELECT u.handle, SUM(s.duration_seconds) AS total_seconds
+FROM users u
+JOIN sessions s ON s.user_id = u.id
+GROUP BY u.handle
+ORDER BY total_seconds DESC;
+
+-- Utilisateurs sans aucune session, via une jointure externe.
+SELECT u.handle
+FROM users u
+LEFT JOIN sessions s ON s.user_id = u.id
+WHERE s.id IS NULL;
+
+-- Sessions plus longues que la moyenne de toutes les sessions.
+SELECT s.id, u.handle, s.duration_seconds
+FROM sessions s
+JOIN users u ON u.id = s.user_id
+WHERE s.duration_seconds > (SELECT AVG(duration_seconds) FROM sessions)
+ORDER BY s.duration_seconds DESC;

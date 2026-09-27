@@ -7,10 +7,10 @@
   "usage": "tokenizer-training",
   "created_date": "2026-09-27",
   "encoding": "UTF-8",
-  "total_bytes": 31683,
+  "total_bytes": 41736,
   "category_bytes": {
     "english": 14106,
-    "code": 17577
+    "code": 27630
   },
   "provenance": {
     "description": "Original English prose and standalone programming examples drafted for this local BPE segmentation experiment.",
@@ -30,7 +30,11 @@
   "verification": {
     "rust": "Three standalone programs compiled with rustc --edition=2021 -D warnings and executed; six unit tests passed.",
     "python": "Six unittest cases passed across two standalone programs under Python 3.14.",
-    "c": "Two standalone programs compiled with gcc -x c -std=c11 -Wall -Wextra -Werror -pedantic and executed with assertions enabled."
+    "c": "Two standalone programs compiled with gcc -x c -std=c11 -Wall -Wextra -Werror -pedantic and executed with assertions enabled.",
+    "javascript": "Two standalone programs executed with Node.js; all inline assertions passed.",
+    "shell": "Two standalone Bash scripts executed with set -euo pipefail; all inline checks passed.",
+    "sql": "Two standalone scripts executed with sqlite3 against an in-memory schema; all statements ran without error.",
+    "cpp": "Two standalone programs compiled with g++ -std=c++17 -Wall -Wextra -Werror -pedantic and executed with assertions enabled."
   },
   "files": [
     {
@@ -109,6 +113,62 @@
       "language": "rust",
       "bytes": 2481,
       "sha256": "c46d5ce63725c908e6998ae51416ad6ae3ae186ee0732dac31ecd3275aed0a95"
+    },
+    {
+      "path": "code/javascript/word_frequency.js.txt",
+      "category": "code",
+      "language": "javascript",
+      "bytes": 1020,
+      "sha256": "9fe8e4e384eef9b59e508e1b3e0babe0629da2b84a98f5d8f9dbd1c455f69e0e"
+    },
+    {
+      "path": "code/javascript/task_queue.js.txt",
+      "category": "code",
+      "language": "javascript",
+      "bytes": 1450,
+      "sha256": "db98e677ac483a3e7f3f417649978541f834a32c84347ba67ef1fa0c0a288160"
+    },
+    {
+      "path": "code/shell/log_rotate.sh.txt",
+      "category": "code",
+      "language": "shell",
+      "bytes": 1077,
+      "sha256": "a943c89301fe01dfc7e611470764bb3fe41703418291b616c547c0a0678864f0"
+    },
+    {
+      "path": "code/shell/backup_report.sh.txt",
+      "category": "code",
+      "language": "shell",
+      "bytes": 1248,
+      "sha256": "b54207e85df32777707ccd31275a2d3097b32e13554bde88312d7abb4cc1b4e8"
+    },
+    {
+      "path": "code/sql/inventory_queries.sql.txt",
+      "category": "code",
+      "language": "sql",
+      "bytes": 1234,
+      "sha256": "07899f286432033614fb91c61d34b371f9685eafcd6e99b7a6e926a3e57797c8"
+    },
+    {
+      "path": "code/sql/user_activity.sql.txt",
+      "category": "code",
+      "language": "sql",
+      "bytes": 1301,
+      "sha256": "e0e7ddaec04e898ebcea5137721fc7ea69d2140dc0b5a7a25ee26320db12f7f4"
+    },
+    {
+      "path": "code/cpp/ring_stats.cpp.txt",
+      "category": "code",
+      "language": "cpp",
+      "bytes": 1337,
+      "sha256": "37de7600a98d767139d2266eb53d2417eb9b218e826e8ce7ed2d147678efd8e3"
+    },
+    {
+      "path": "code/cpp/text_tokens.cpp.txt",
+      "category": "code",
+      "language": "cpp",
+      "bytes": 1386,
+      "sha256": "5c57f6805c6e4ae00e1cebfb9ca934f591bd63fa583c239dc78d95982e1a31db"
     }
   ]
 }

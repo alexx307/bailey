@@ -1,0 +1,38 @@
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+    stock INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT INTO products (id, name, category, price_cents, stock) VALUES
+    (1, 'Cahier', 'papeterie', 250, 40),
+    (2, 'Stylo bleu', 'papeterie', 120, 0),
+    (3, 'Clavier', 'informatique', 3990, 12),
+    (4, 'Souris', 'informatique', 1550, 30),
+    (5, 'Classeur', 'papeterie', 400, 8);
+
+-- Valeur totale du stock par categorie, categories les plus riches en premier.
+SELECT category,
+       SUM(price_cents * stock) AS total_value_cents,
+       COUNT(*) AS references_count
+FROM products
+GROUP BY category
+ORDER BY total_value_cents DESC;
+
+-- Produits en rupture de stock.
+SELECT name FROM products WHERE stock = 0;
+
+-- Prix moyen par categorie, arrondi au centime.
+SELECT category, ROUND(AVG(price_cents), 0) AS average_price_cents
+FROM products
+GROUP BY category;
+
+-- Le produit le plus cher de chaque categorie, via une sous-requete correlee.
+SELECT p.category, p.name, p.price_cents
+FROM products p
+WHERE p.price_cents = (
+    SELECT MAX(p2.price_cents) FROM products p2 WHERE p2.category = p.category
+)
+ORDER BY p.category;

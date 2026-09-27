@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+rotate_log() {
+  local file="$1"
+  local keep="$2"
+  if [[ ! -f "$file" ]]; then
+    echo "skip: $file does not exist" >&2
+    return 0
+  fi
+  for ((i = keep - 1; i >= 1; i--)); do
+    if [[ -f "${file}.${i}" ]]; then
+      mv "${file}.${i}" "${file}.$((i + 1))"
+    fi
+  done
+  mv "$file" "${file}.1"
+  : > "$file"
+}
+
+count_lines() {
+  local file="$1"
+  wc -l < "$file" | tr -d ' '
+}
+
+main() {
+  local workdir
+  workdir="$(mktemp -d)"
+  trap "rm -rf '$workdir'" EXIT
+
+  local log="$workdir/app.log"
+  printf 'ligne 1\nligne 2\nligne 3\n' > "$log"
+
+  rotate_log "$log" 3
+  [[ -f "${log}.1" ]] || { echo "echec: rotation manquante" >&2; exit 1; }
+  [[ "$(count_lines "${log}.1")" == "3" ]] || { echo "echec: contenu perdu" >&2; exit 1; }
+  [[ "$(count_lines "$log")" == "0" ]] || { echo "echec: log non vide" >&2; exit 1; }
+
+  printf 'nouvelle ligne\n' > "$log"
+  rotate_log "$log" 3
+  [[ -f "${log}.2" ]] || { echo "echec: deuxieme rotation manquante" >&2; exit 1; }
+
+  echo "log_rotate: toutes les verifications ont reussi"
+}
+
+main "$@"

@@ -1,0 +1,55 @@
+#include <cassert>
+#include <cstddef>
+#include <iostream>
+#include <optional>
+#include <vector>
+
+class RingBuffer {
+public:
+    explicit RingBuffer(std::size_t capacity) : data_(capacity), capacity_(capacity) {}
+
+    void push(double value) {
+        data_[next_] = value;
+        next_ = (next_ + 1) % capacity_;
+        if (count_ < capacity_) {
+            count_ += 1;
+        }
+    }
+
+    std::optional<double> average() const {
+        if (count_ == 0) {
+            return std::nullopt;
+        }
+        double total = 0.0;
+        for (std::size_t i = 0; i < count_; ++i) {
+            total += data_[i];
+        }
+        return total / static_cast<double>(count_);
+    }
+
+    std::size_t size() const { return count_; }
+
+private:
+    std::vector<double> data_;
+    std::size_t capacity_;
+    std::size_t next_ = 0;
+    std::size_t count_ = 0;
+};
+
+int main() {
+    RingBuffer buffer(3);
+    assert(!buffer.average().has_value());
+
+    buffer.push(10.0);
+    buffer.push(20.0);
+    assert(buffer.size() == 2);
+    assert(buffer.average().value() == 15.0);
+
+    buffer.push(30.0);
+    buffer.push(40.0); // ecrase la premiere valeur (10.0)
+    assert(buffer.size() == 3);
+    assert(buffer.average().value() == 30.0); // (20+30+40)/3
+
+    std::cout << "ring_stats: toutes les assertions ont reussi" << std::endl;
+    return 0;
+}

@@ -1,0 +1,26 @@
+{
+  "language": "fr",
+  "topics": [
+    "langue française", "grammaire française", "orthographe", "littérature française",
+    "poésie", "théâtre", "linguistique",
+    "mathématiques", "algèbre", "géométrie", "statistiques", "logique",
+    "physique", "chimie", "astronomie", "univers", "espace",
+    "biologie", "anatomie humaine", "zoologie", "botanique", "génétique", "écologie",
+    "géologie", "océanographie", "climat",
+    "informatique", "algorithme", "intelligence artificielle", "robotique", "internet",
+    "histoire de France", "histoire mondiale", "moyen âge", "révolution française",
+    "géographie", "géopolitique", "économie", "politique", "droit",
+    "philosophie", "psychologie", "sociologie", "anthropologie", "archéologie",
+    "religion", "mythologie",
+    "médecine", "santé publique",
+    "musique", "cinéma", "peinture", "sculpture", "architecture",
+    "cuisine française", "agriculture",
+    "sport", "football", "jeux olympiques",
+    "transport", "énergie", "technologie"
+  ],
+  "cycles": 30,
+  "pages_per_topic": 3,
+  "interval_seconds": 5,
+  "max_minutes": 1440,
+  "max_library_bytes": 536870912
+}

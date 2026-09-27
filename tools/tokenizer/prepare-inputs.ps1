@@ -7,11 +7,11 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $projectDirectory = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$destination = [IO.Path]::GetFullPath($Out, $projectDirectory)
+$destination = [IO.Path]::GetFullPath((Join-Path $projectDirectory $Out))
 if (Test-Path -LiteralPath $destination) { throw 'Utiliser un nouveau dossier de sources.' }
-$frenchDirectory = [IO.Path]::GetFullPath($French, $projectDirectory)
-$englishDirectory = [IO.Path]::GetFullPath($English, $projectDirectory)
-$originalDirectory = [IO.Path]::GetFullPath($Original, $projectDirectory)
+$frenchDirectory = [IO.Path]::GetFullPath((Join-Path $projectDirectory $French))
+$englishDirectory = [IO.Path]::GetFullPath((Join-Path $projectDirectory $English))
+$originalDirectory = [IO.Path]::GetFullPath((Join-Path $projectDirectory $Original))
 $originalManifest = Join-Path $originalDirectory 'manifest.json'
 $originalSpec = Get-Content -LiteralPath $originalManifest -Raw | ConvertFrom-Json
 foreach ($directory in @($frenchDirectory, $englishDirectory)) {
@@ -21,7 +21,7 @@ foreach ($directory in @($frenchDirectory, $englishDirectory)) {
         }
     }
 }
-$codeFiles = foreach ($subject in @('model', 'training', 'inference', 'web', 'knowledge', 'research')) {
+$codeFiles = foreach ($subject in @('model', 'training', 'inference', 'web', 'knowledge', 'research', 'app', 'forge')) {
     Get-ChildItem -LiteralPath (Join-Path $projectDirectory "crates/bailey-core/src/$subject") -Filter '*.rs' -File -Recurse |
         Where-Object {
             $_.Name -notlike '*test*' -and
@@ -30,12 +30,20 @@ $codeFiles = foreach ($subject in @('model', 'training', 'inference', 'web', 'kn
 }
 New-Item -ItemType Directory -Path $destination | Out-Null
 $sources = [Collections.Generic.List[object]]::new()
+function ConvertTo-RelativePath([string]$Base, [string]$Target) {
+    $baseUri = New-Object System.Uri(($Base.TrimEnd('\','/') + [IO.Path]::DirectorySeparatorChar))
+    $targetUri = New-Object System.Uri($Target)
+    [Uri]::UnescapeDataString($baseUri.MakeRelativeUri($targetUri).ToString())
+}
+function Write-Utf8NoBom([string]$Path, [string]$Content) {
+    [IO.File]::WriteAllText($Path, $Content, (New-Object System.Text.UTF8Encoding($false)))
+}
 function Add-MixSource([string]$Id, [string]$Domain, [string]$File, [string]$Provenance) {
     $sources.Add([ordered]@{
         id = $Id; domain = $Domain; partition = 'train'
-        file = [IO.Path]::GetRelativePath($destination, $File).Replace('\','/')
+        file = (ConvertTo-RelativePath $destination $File).Replace('\','/')
         sha256 = (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()
-        provenance = [IO.Path]::GetRelativePath($destination, $Provenance).Replace('\','/')
+        provenance = (ConvertTo-RelativePath $destination $Provenance).Replace('\','/')
     })
 }
 Add-MixSource 'wikipedia-fr-train' 'french' (Join-Path $frenchDirectory 'train.txt') (Join-Path $frenchDirectory 'manifest.json')
@@ -50,7 +58,7 @@ foreach ($item in $originalSpec.files) {
 }
 $codeManifest = Join-Path $destination 'code-source-manifest.json'
 $codeRecords = foreach ($file in ($codeFiles | Sort-Object FullName)) {
-    $relative = [IO.Path]::GetRelativePath($projectDirectory, $file.FullName)
+    $relative = ConvertTo-RelativePath $projectDirectory $file.FullName
     $target = Join-Path $destination (Join-Path 'code' $relative)
     New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
     Copy-Item -LiteralPath $file.FullName -Destination $target
@@ -59,14 +67,16 @@ $codeRecords = foreach ($file in ($codeFiles | Sort-Object FullName)) {
 }
 $revision = & git -C $projectDirectory rev-parse HEAD
 if ($LASTEXITCODE -ne 0) { throw 'Revision Git indisponible.' }
-[ordered]@{
+$codeManifestJson = [ordered]@{
     origin = 'Local Bailey working-copy source snapshot, never uploaded'
     revision_context = $revision
     license = 'Local project sources; no public redistribution license asserted'
     selection = 'Named implementation folders only; exclude filenames containing test and files with cfg(test); exclude tokenization, probes and curriculum'
     files = @($codeRecords)
-} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $codeManifest -Encoding utf8NoBOM
-[ordered]@{
+} | ConvertTo-Json -Depth 8
+Write-Utf8NoBom $codeManifest $codeManifestJson
+$mixJson = [ordered]@{
     seed = 42; max_text_bytes = $MaxTextBytes; percentages = @(70,15,15); sources = @($sources)
-} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $destination 'mix.json') -Encoding utf8NoBOM
+} | ConvertTo-Json -Depth 8
+Write-Utf8NoBom (Join-Path $destination 'mix.json') $mixJson
 Write-Output "Configuration : $destination/mix.json ; $($sources.Count) sources explicites."

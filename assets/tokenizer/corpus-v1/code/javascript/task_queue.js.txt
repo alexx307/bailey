@@ -1,0 +1,59 @@
+class TaskQueue {
+  constructor(concurrency) {
+    if (concurrency < 1) throw new Error("concurrency must be at least 1");
+    this.concurrency = concurrency;
+    this.pending = [];
+    this.active = 0;
+    this.results = [];
+  }
+
+  push(task) {
+    this.pending.push(task);
+  }
+
+  async drain() {
+    const workers = [];
+    for (let i = 0; i < this.concurrency; i += 1) {
+      workers.push(this.#worker());
+    }
+    await Promise.all(workers);
+    return this.results;
+  }
+
+  async #worker() {
+    while (this.pending.length > 0) {
+      const task = this.pending.shift();
+      this.active += 1;
+      try {
+        const value = await task();
+        this.results.push({ ok: true, value });
+      } catch (error) {
+        this.results.push({ ok: false, error: String(error) });
+      } finally {
+        this.active -= 1;
+      }
+    }
+  }
+}
+
+function assert(condition, label) {
+  if (!condition) throw new Error(`Assertion failed: ${label}`);
+}
+
+async function main() {
+  const queue = new TaskQueue(2);
+  queue.push(async () => 1 + 1);
+  queue.push(async () => {
+    throw new Error("boom");
+  });
+  queue.push(async () => 6 * 7);
+
+  const results = await queue.drain();
+  assert(results.length === 3, "three results collected");
+  assert(results.filter((r) => r.ok).length === 2, "two tasks succeeded");
+  assert(results.filter((r) => !r.ok).length === 1, "one task failed");
+
+  console.log("task_queue: all assertions passed");
+}
+
+main();

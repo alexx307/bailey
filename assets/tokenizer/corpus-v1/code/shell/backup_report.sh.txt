@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+human_size() {
+  local bytes="$1"
+  local unit="$2"
+  local scale=$((unit == 1048576 ? 1048576 : 1024))
+  local suffix="K"
+  ((unit == 1048576)) && suffix="M"
+  if ((bytes < scale)); then
+    printf '%dB' "$bytes"
+    return 0
+  fi
+  local tenths=$(((bytes * 10) / scale))
+  printf '%d.%d%s' "$((tenths / 10))" "$((tenths % 10))" "$suffix"
+}
+
+report_directory() {
+  local dir="$1"
+  local total=0
+  local file
+  for file in "$dir"/*; do
+    [[ -f "$file" ]] || continue
+    local size
+    size="$(wc -c < "$file")"
+    total=$((total + size))
+    echo "  $(basename "$file"): ${size} octets"
+  done
+  echo "total: ${total} octets"
+  printf '%s\n' "$total"
+}
+
+main() {
+  local workdir
+  workdir="$(mktemp -d)"
+  trap "rm -rf '$workdir'" EXIT
+
+  printf 'abcde' > "$workdir/un.txt"
+  printf 'abcdefghij' > "$workdir/deux.txt"
+
+  local total
+  total="$(report_directory "$workdir" | tail -n1)"
+  [[ "$total" == "15" ]] || { echo "echec: total attendu 15, obtenu $total" >&2; exit 1; }
+
+  local formatted
+  formatted="$(human_size 2048 1024)"
+  [[ "$formatted" == "2.0K" ]] || { echo "echec: formatage inattendu: $formatted" >&2; exit 1; }
+
+  echo "backup_report: toutes les verifications ont reussi"
+}
+
+main "$@"
