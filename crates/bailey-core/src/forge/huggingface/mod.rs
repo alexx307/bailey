@@ -51,6 +51,7 @@ pub fn import(args: &ImportArgs) -> Result<()> {
     let mut reader = client::Reader::new(
         client::DATASET,
         client::CONFIG,
+        false,
         args.max_download_mb * 1024 * 1024,
     )?;
     fs::create_dir_all(args.out.parent().unwrap_or(std::path::Path::new(".")))?;

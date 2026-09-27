@@ -48,6 +48,8 @@ pub struct BookImportArgs {
     pub max_download_mb: u64,
     #[arg(long, default_value_t = 45)]
     pub max_minutes: u64,
+    #[arg(long, default_value_t = 4)]
+    pub interval_seconds: u64,
     #[arg(long, default_value_t = 60)]
     pub min_ocr_score: u32,
 }
@@ -102,14 +104,16 @@ pub fn import(args: &BookImportArgs) -> Result<()> {
     ensure!(
         (1..=400).contains(&args.max_text_mb)
             && (1..=1024).contains(&args.max_download_mb)
-            && (1..=60).contains(&args.max_minutes),
+            && (1..=60).contains(&args.max_minutes)
+            && (1..=60).contains(&args.interval_seconds),
         "Budgets hors limites du pilote"
     );
     ensure!(
         args.min_ocr_score <= 100,
         "Score OCR minimal attendu : 0..100"
     );
-    let mut reader = client::Reader::new(DATASET, CONFIG, args.max_download_mb * 1024 * 1024)?;
+    let mut reader =
+        client::Reader::new(DATASET, CONFIG, true, args.max_download_mb * 1024 * 1024)?;
     fs::create_dir_all(args.out.parent().unwrap_or(std::path::Path::new(".")))?;
     fs::create_dir(&args.out)?;
     let mut files = Vec::new();
@@ -201,7 +205,7 @@ pub fn import(args: &BookImportArgs) -> Result<()> {
                 import_reason = "end_of_source";
                 break;
             }
-            std::thread::sleep(Duration::from_secs(1));
+            std::thread::sleep(Duration::from_secs(args.interval_seconds));
         }
         Ok(())
     })();
@@ -219,6 +223,7 @@ pub fn import(args: &BookImportArgs) -> Result<()> {
         "local_splits": ["train", "validation", "test"],
         "counts": counts, "text_bytes": sizes, "rows_visited": visited,
         "downloaded_body_bytes": reader.downloaded,
+        "source_reported_partial_index": reader.saw_partial,
         "dataset_license": "Public domain (EU rule: author deceased 70+ years) per the dataset curator's own claim; no machine-readable SPDX license tag on the dataset card",
         "license_note": "Digitizations are sourced from Gallica (BnF). The BnF's own terms of use restrict commercial reuse of the digitized files themselves, separately from the public-domain status of the underlying works. Not verified independently per book.",
         "license_url": "https://huggingface.co/datasets/PleIAs/French-PD-Books",
@@ -234,6 +239,7 @@ pub fn import(args: &BookImportArgs) -> Result<()> {
             "No independent language verification: relies on the dataset's own French-only curation.",
             "Rows API does not pin a dataset revision; exported local snapshot is fingerprinted by Forge.",
             "This bounded pilot samples a tiny fraction of the 289,000-book collection; it is not a representative literary corpus.",
+            "The dataset-server preview reported a partial index for this dataset (num_rows_total reflects only the indexed prefix, not the full 289,000 books); pagination cannot reach the rest of the collection through this API.",
         ]
     });
     let name = if complete {
