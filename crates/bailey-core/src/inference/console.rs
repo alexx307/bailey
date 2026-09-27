@@ -12,21 +12,39 @@ use std::{
 pub fn console(run: &Path, device: &Device) -> Result<()> {
     let (model, config) = checkpoint::load(run, device)?;
     let tokenizer = tokenization::load(&run.join("tokenizer.json"))?;
-    println!(
-        "Bailey Core | {} parametres | {}",
-        config.model.parameter_count()?,
-        run.display()
-    );
-    println!("Modele experimental : un essai court ne lui apprend pas encore a converser.");
-    println!("/brut : completion ; /dialogue : format question/reponse ; /quitter : sortie");
-    println!("/recherche sujet : Wikipedia ; /memoire sujet : sources deja conservees");
     let mut dialogue = true;
     let mut sampling = super::Sampling::default();
     let mut diagnostic = false;
-    println!("Calcul sur {device:?} | /greedy ; /sampling ; /diagnostic");
-    println!("Cette console ne s'entraine pas en attendant tes messages.");
+    super::theme::title();
+    super::theme::panel(
+        "État",
+        &[
+            ("Modèle", run.display().to_string()),
+            ("Paramètres", config.model.parameter_count()?.to_string()),
+            ("Device", format!("{device:?}")),
+            ("Mode", "dialogue".into()),
+            (
+                "Statut",
+                "expérimental — pas encore un dialogue général".into(),
+            ),
+        ],
+    );
+    super::theme::panel(
+        "Commandes disponibles",
+        &[
+            ("/dialogue", "question/reponse, sans historique".into()),
+            ("/brut", "completion libre".into()),
+            ("/memoire <sujet>", "sources deja conservees".into()),
+            ("/recherche <sujet>", "consulte Wikipedia".into()),
+            ("/greedy", "generation deterministe".into()),
+            ("/sampling", "temperature/top-k/top-p".into()),
+            ("/diagnostic", "affiche les premieres predictions".into()),
+            ("/quitter", "ferme la console".into()),
+        ],
+    );
+    println!("Cette console ne s'entraine pas en attendant tes messages.\n");
     loop {
-        print!("Toi > ");
+        print!("{}", super::theme::you_prompt());
         io::stdout().flush()?;
         let mut line = String::new();
         if io::stdin().read_line(&mut line)? == 0 {
@@ -98,7 +116,7 @@ pub fn console(run: &Path, device: &Device) -> Result<()> {
             device,
         ) {
             Ok(result) => {
-                println!("Bailey > {}\n", result.text);
+                println!("{} {}\n", super::theme::bailey_prefix(), result.text);
                 if diagnostic {
                     println!("{}", serde_json::to_string_pretty(&result)?);
                 }

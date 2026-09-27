@@ -60,8 +60,9 @@ Le script initialise MSVC et CUDA uniquement dans son processus :
 `check-model` vérifie les gradients et AdamW sur trois pas synthétiques. Pour
 entraîner réellement, utiliser `train` avec ses corpus `train.txt` et
 `validation.txt`, puis mesurer séparément les capacités. Le jeu de test ne sert
-jamais à sélectionner les checkpoints. Le CPU est le périphérique par défaut ;
-`--device cuda` exige une compilation avec `--features cuda`.
+jamais à sélectionner les checkpoints. Le GPU (CUDA) est le périphérique par
+défaut ; `--device cpu` reste disponible explicitement. Un binaire compilé
+sans `--features cuda` refuse clairement plutôt que d'échouer en silence.
 
 La baseline utilise FP32 et une attention différentiable classique. Cache KV,
 FlashAttention d'entraînement, précision mixte et accumulation des gradients

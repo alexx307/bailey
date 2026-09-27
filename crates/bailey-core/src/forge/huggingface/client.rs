@@ -72,17 +72,7 @@ impl Reader {
     }
     pub fn page<T: DeserializeOwned>(&mut self, offset: u64, length: usize) -> Result<Page<T>> {
         ensure!((1..=100).contains(&length), "Taille de page invalide");
-        let response = self
-            .http
-            .get("https://datasets-server.huggingface.co/rows")
-            .query(&[
-                ("dataset", self.dataset),
-                ("config", self.config),
-                ("split", "train"),
-                ("offset", &offset.to_string()),
-                ("length", &length.to_string()),
-            ])
-            .send()?;
+        let response = self.get_with_retry(offset, length)?;
         ensure!(
             response.status().is_success(),
             "Hugging Face HTTP {} ; aucune autre source substituee",
@@ -109,5 +99,37 @@ impl Reader {
             );
         }
         Ok(page)
+    }
+
+    /// Retries only transient gateway errors (502/503/504), not the 429 quota
+    /// signal or any other status ; matches the existing "no bypassing the
+    /// quota, no substituted source" rule while tolerating flaky infra.
+    fn get_with_retry(&self, offset: u64, length: usize) -> Result<reqwest::blocking::Response> {
+        const BACKOFF: [u64; 2] = [5, 15];
+        let mut attempt = 0;
+        loop {
+            let response = self
+                .http
+                .get("https://datasets-server.huggingface.co/rows")
+                .query(&[
+                    ("dataset", self.dataset),
+                    ("config", self.config),
+                    ("split", "train"),
+                    ("offset", &offset.to_string()),
+                    ("length", &length.to_string()),
+                ])
+                .send()?;
+            let transient = matches!(response.status().as_u16(), 502..=504);
+            if !transient || attempt >= BACKOFF.len() {
+                return Ok(response);
+            }
+            eprintln!(
+                "Hugging Face HTTP {} ; nouvelle tentative dans {}s",
+                response.status(),
+                BACKOFF[attempt]
+            );
+            std::thread::sleep(Duration::from_secs(BACKOFF[attempt]));
+            attempt += 1;
+        }
     }
 }

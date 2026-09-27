@@ -4,7 +4,9 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(version, about = "Bailey Core : fondation de langage en Rust")]
 pub struct Cli {
-    #[arg(long, global = true, value_enum, default_value = "cpu")]
+    /// Defaut cuda a la demande du proprietaire ; --device cpu reste explicite.
+    /// Un binaire compile sans --features cuda echoue clairement, pas en silence.
+    #[arg(long, global = true, value_enum, default_value = "cuda")]
     pub device: DeviceChoice,
     #[command(subcommand)]
     pub command: Command,
