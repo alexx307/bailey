@@ -39,11 +39,22 @@ pub struct Reader {
     http: Client,
     dataset: &'static str,
     config: &'static str,
+    allow_partial: bool,
     pub downloaded: u64,
+    pub saw_partial: bool,
     max_download: u64,
 }
 impl Reader {
-    pub fn new(dataset: &'static str, config: &'static str, max_download: u64) -> Result<Self> {
+    /// `allow_partial` accepts a source whose dataset-server preview has not
+    /// finished indexing the whole dataset (large datasets only expose a
+    /// bounded prefix through this API). Kept false by default so an
+    /// unexpected partial response still fails loudly for existing sources.
+    pub fn new(
+        dataset: &'static str,
+        config: &'static str,
+        allow_partial: bool,
+        max_download: u64,
+    ) -> Result<Self> {
         Ok(Self {
             http: Client::builder()
                 .https_only(true)
@@ -53,7 +64,9 @@ impl Reader {
                 .build()?,
             dataset,
             config,
+            allow_partial,
             downloaded: 0,
+            saw_partial: false,
             max_download,
         })
     }
