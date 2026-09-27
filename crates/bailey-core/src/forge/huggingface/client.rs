@@ -99,7 +99,11 @@ impl Reader {
             "Reponse ou budget trop grand ; reduire le nombre de lignes par requete"
         );
         let page: Page<T> = serde_json::from_slice(&bytes)?;
-        ensure!(!page.partial, "Apercu partiel refuse");
+        ensure!(
+            !page.partial || self.allow_partial,
+            "Apercu partiel refuse"
+        );
+        self.saw_partial |= page.partial;
         ensure!(page.rows.len() <= length, "Reponse hors limite de lignes");
         for (i, row) in page.rows.iter().enumerate() {
             ensure!(
