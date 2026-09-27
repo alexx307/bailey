@@ -2,14 +2,15 @@
 //!
 //! Le constructeur conserve la provenance originale et le tokenizer. Les SHA256
 //! détectent les corruptions accidentelles, sans constituer une signature d'auteur.
-//! Prototype : un fichier source est tokenisé en RAM ; le chargeur retourne toute
-//! la partition demandée en RAM. Aucune lecture des shards test pour charger train.
+//! Construction pilote en RAM ; lecture soit en RAM, soit par pages dans `stream`.
+//! Aucune lecture des shards test pour charger train avec l'un de ces lecteurs.
 
 mod build;
 mod duplicate;
 mod io;
 mod load;
 mod manifest;
+pub mod stream;
 
 pub use build::build;
 pub use load::{load_partition, read_manifest};

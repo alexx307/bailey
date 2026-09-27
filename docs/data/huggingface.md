@@ -87,6 +87,7 @@ dans les textes, pas des mots connus ou des connaissances acquises.
 
 Le jeu complet et les 10–15 Go envisagés dans le document ne sont pas téléchargés.
 Un milliard de tokens U32 occupe 4 milliards d'octets sur disque ; le corpus
-peut rester sur disque à condition d'avoir un lecteur de lots en flux. Le
-chargeur actuel est encore limité à une partition en RAM. Il faut terminer
-cette étape avant un corpus massif ou une longue séance de pré-entraînement.
+peut rester sur disque avec le [lecteur `shards-stream`](streaming.md), ajouté
+le 27 septembre. Le mode historique `shards` reste limité à une partition en RAM.
+L'import massif et la construction des shards en flux doivent encore être
+terminés avant une collecte à cette échelle.

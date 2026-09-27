@@ -34,6 +34,7 @@ fn device(choice: DeviceChoice) -> Result<Device> {
 
 pub fn execute(cli: Cli) -> Result<()> {
     match cli.command {
+        Command::StreamCheck(args) => super::stream_probe::run(&args),
         Command::TokenizerMix { config, out } => crate::tokenization::mix::prepare(&config, &out),
         Command::TokenizerAudit {
             tokenizer,
@@ -133,6 +134,7 @@ pub fn execute(cli: Cli) -> Result<()> {
                     evaluation_windows: args.evaluation_windows,
                     objective: args.objective,
                     data_format: args.data_format,
+                    shard_cache_mib: args.shard_cache_mib,
                 },
                 &args.out,
                 &device(cli.device)?,

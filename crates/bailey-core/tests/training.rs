@@ -46,6 +46,7 @@ fn training_saves_reloads_and_continues_without_changing_the_previous_run() -> R
         evaluation_windows: 8,
         objective: training::Objective::NextToken,
         data_format: training::DataFormat::Text,
+        shard_cache_mib: 8,
     };
     let run = temp.path().join("first");
     training::train(config.clone(), &run, &Device::Cpu)?;

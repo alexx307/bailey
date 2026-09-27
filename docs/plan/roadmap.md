@@ -86,5 +86,6 @@ candidates distinctes, tests, promotion et retour à la version précédente.
 
 La préparation locale des futures séances GPU distantes est détaillée dans
 [le plan Forge](forge.md). Shards et reprise complète d'Adam sont disponibles pour
-les essais locaux ; le lecteur en flux, l'import massif Parquet et le lancement
-cloud restent à implémenter. Aucune location n'est lancée.
+les essais locaux. Le lecteur `shards-stream` à cache borné est intégré à
+l'entraînement et à la reprise ; l'import massif Parquet, la construction de
+shards en flux et le lancement cloud restent à implémenter. Aucune location n'est lancée.

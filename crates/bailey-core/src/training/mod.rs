@@ -8,6 +8,7 @@ mod optimizer;
 mod progress;
 mod runner;
 mod schedule;
+mod streaming;
 mod training_data;
 
 pub use config::{DataFormat, Objective, TrainConfig};

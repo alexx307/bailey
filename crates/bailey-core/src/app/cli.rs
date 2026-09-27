@@ -18,6 +18,8 @@ pub enum DeviceChoice {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Verifier la lecture disque bornee de train sans entrainer un modele.
+    StreamCheck(super::stream_probe::StreamArgs),
     /// Preparer un melange train francais/anglais/code pour un candidat tokenizer.
     TokenizerMix {
         #[arg(long)]
@@ -162,6 +164,9 @@ pub enum Command {
 
 #[derive(Args)]
 pub struct TrainArgs {
+    /// Cache disque par partition pour --data-format shards-stream.
+    #[arg(long, default_value_t = 8)]
+    pub shard_cache_mib: usize,
     #[arg(long, value_enum, default_value = "text")]
     pub data_format: crate::training::DataFormat,
     /// Arreter proprement apres cette etape globale, en gardant le planning total.

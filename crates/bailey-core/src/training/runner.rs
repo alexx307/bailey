@@ -91,7 +91,10 @@ fn run(
     );
     let train = TrainingData::load(&config.data.join("train.txt"), &tokenizer, &config)?;
     let validation = TrainingData::load(&config.data.join("validation.txt"), &tokenizer, &config)?;
-    ensure!(train != validation, "Corpus train et validation identiques");
+    ensure!(
+        !train.same_content(&validation),
+        "Corpus train et validation identiques"
+    );
     let restored = previous
         .map(|run| progress::read(run, &config))
         .transpose()?;
@@ -186,6 +189,7 @@ fn run(
         progress::inherit_best(previous, out, &state)?;
     }
     progress::save(&vars, &optimizer, out, &mut state)?;
+    super::training_data::write_io_report(&train, &validation, out)?;
     let mut last_saved = state.step;
     let mut log = OpenOptions::new()
         .write(true)
@@ -217,6 +221,7 @@ fn run(
                 "Arret apres {} etapes ; etat complet sauvegarde.",
                 state.step
             );
+            super::training_data::write_io_report(&train, &validation, out)?;
             return Ok(false);
         }
         let step_start = Instant::now();
@@ -249,6 +254,7 @@ fn run(
                 state.best_step = step;
             }
             progress::save(&vars, &optimizer, out, &mut state)?;
+            super::training_data::write_io_report(&train, &validation, out)?;
             last_saved = step;
             let rate_tokens = (state.input_tokens - initial_tokens) as f64 / compute_seconds;
             writeln!(

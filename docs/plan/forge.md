@@ -17,9 +17,10 @@ document ne sont pas repris comme devis vérifié.
 4. `forge/dataset/` produit des shards U32 pré-tokenisés, un manifeste des sources,
    les SHA256 du tokenizer et des shards, les effectifs réels et la partition.
    Le chargeur vérifie leur intégrité et les IDs. Le constructeur reste limité à
-   512 Mio de texte par partition ; le lecteur charge la partition demandée en RAM
-   et refuse plus de 134 217 728 tokens. Il faut encore un lecteur en flux pour
-   les corpus de plusieurs milliards de tokens.
+   512 Mio de texte par partition. Le lecteur historique `shards` charge la
+   partition en RAM et refuse plus de 134 217 728 tokens. `shards-stream` lit
+   maintenant les fenêtres par pages de 64 Kio avec cache réglable, sans cette
+   limite fixe. Son index et ses handles dépendent du nombre de shards.
 5. `training/` mesure le débit et sauvegarde poids, moments AdamW, pas global et
    sélection. Le planning utilise ce pas ; le tirage des fenêtres est déterminé
    par la graine et le pas global, sans curseur de lecture mutable. `resume`
@@ -59,8 +60,8 @@ La [préparation du tokenizer commun](tokenizer-generaliste.md) ajoute un mélan
 train français/anglais/code et un audit de restitution/fragmentation sur sondes
 de développement. Les candidats restent distincts du tokenizer des poids actifs.
 
-Suite : ingestion Parquet avec projection du texte et révision figée, traitement
-en flux et déduplication à grande échelle, corpus élargi et revu, choix définitif
+Suite : ingestion Parquet avec projection du texte et révision figée, construction
+des shards en flux et déduplication à grande échelle, corpus élargi et revu, choix définitif
 du tokenizer, comparaison locale puis conditionnement cloud. BF16, accumulation,
 cache KV et attention optimisée nécessitent leurs propres tests et mesures.
 

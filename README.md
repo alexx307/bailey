@@ -175,9 +175,22 @@ Pour une nouvelle expérience CUDA à partir des poids français actuels :
 ```
 
 Les shards actuels servent au texte continu (`next-token`), pas au dialogue
-masqué. Le prototype charge la partition en RAM et n'est pas encore un lecteur
-en flux pour des milliards de tokens. Aucun de ces pilotes ne remplace un
-pré-entraînement substantiel ni une évaluation des compétences.
+masqué. `--data-format shards` conserve l'ancien chargement en RAM.
+`--data-format shards-stream --shard-cache-mib 8` lit les fenêtres sur disque
+avec un cache de 8 Mio par partition et des pages de 64 Kio. La vérification
+initiale parcourt les shards train/validation avec un tampon borné ; aucun shard
+test n'est lu. Les lots et le modèle occupent leur mémoire en plus du cache.
+
+```powershell
+& target/debug/bailey-core.exe stream-check --data data/forge-wikipedia-fr-v1 `
+  --cache-mib 1 --windows 256 --sequence 1024 --out runs/stream-check-NOUVEAU.json
+```
+
+Le même mode s'utilise avec `train` et est conservé par `resume`. Chaque séance
+écrit `data-reader.json` : cache courant/maximal, accès et octets lus, validation
+initiale comptée séparément. Voir le [guide du lecteur en flux](docs/data/streaming.md).
+La construction actuelle des shards et les imports massifs restent à améliorer ;
+la lecture en flux n'apprend aucune compétence à elle seule.
 
 ## Préparer le tokenizer commun
 

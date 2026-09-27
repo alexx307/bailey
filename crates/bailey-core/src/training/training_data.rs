@@ -1,5 +1,7 @@
 use super::{Objective, TrainConfig, dataset, dialogue::Dialogues, evaluation};
-use crate::{model::CoreModel, tokenization::Tokenizer};
+use crate::{
+    forge::dataset::stream::StreamingPartition, model::CoreModel, tokenization::Tokenizer,
+};
 use anyhow::Result;
 use candle_core::{Device, Tensor};
 use rand::{Rng, rngs::StdRng};
@@ -22,14 +24,38 @@ impl Batch {
     }
 }
 
-#[derive(PartialEq)]
 pub enum TrainingData {
     Text(Vec<u32>),
     Dialogue(Dialogues),
+    Stream(StreamingPartition),
 }
 impl TrainingData {
     pub fn load(file: &Path, tokenizer: &Tokenizer, config: &TrainConfig) -> Result<Self> {
         Ok(match config.objective {
+            Objective::NextToken
+                if matches!(config.data_format, super::DataFormat::ShardsStream) =>
+            {
+                let partition = file
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .ok_or_else(|| anyhow::anyhow!("Partition invalide"))?;
+                println!(
+                    "Verification en flux de {partition} ; cache {} Mio, aucun chargement integral en RAM.",
+                    config.shard_cache_mib
+                );
+                let reader = StreamingPartition::open(
+                    &config.data,
+                    partition,
+                    &config.tokenizer,
+                    config.model.vocab_size,
+                    config.shard_cache_mib * 1024 * 1024,
+                )?;
+                anyhow::ensure!(
+                    reader.len() > config.sequence,
+                    "Partition trop courte pour le contexte"
+                );
+                Self::Stream(reader)
+            }
             Objective::NextToken => {
                 let ids = match config.data_format {
                     super::DataFormat::Text => {
@@ -43,6 +69,7 @@ impl TrainingData {
                         &config.tokenizer,
                         config.model.vocab_size,
                     )?,
+                    super::DataFormat::ShardsStream => unreachable!("branche flux traitee avant"),
                 };
                 anyhow::ensure!(
                     ids.len() > config.sequence,
@@ -62,10 +89,31 @@ impl TrainingData {
         match self {
             Self::Text(ids) => ids.len(),
             Self::Dialogue(data) => data.tokens,
+            Self::Stream(reader) => reader.len(),
+        }
+    }
+    pub fn reading_stats(&self) -> serde_json::Value {
+        match self {
+            Self::Stream(reader) => serde_json::json!({"mode":"shards_stream","io":reader.stats()}),
+            Self::Text(ids) => {
+                serde_json::json!({"mode":"resident_tokens","token_bytes":ids.len()*4})
+            }
+            Self::Dialogue(data) => {
+                serde_json::json!({"mode":"resident_dialogue","tokens":data.tokens})
+            }
+        }
+    }
+    pub fn same_content(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Text(a), Self::Text(b)) => a == b,
+            (Self::Dialogue(a), Self::Dialogue(b)) => a == b,
+            (Self::Stream(a), Self::Stream(b)) => a.fingerprint() == b.fingerprint(),
+            _ => false,
         }
     }
     pub fn batch(&self, config: &TrainConfig, rng: &mut StdRng, device: &Device) -> Result<Batch> {
         match self {
+            Self::Stream(reader) => super::streaming::random_batch(reader, config, rng, device),
             Self::Text(ids) => {
                 let (input, target) =
                     dataset::random_batch(ids, config.batch_size, config.sequence, rng, device)?;
@@ -90,6 +138,7 @@ impl TrainingData {
         device: &Device,
     ) -> Result<f32> {
         match self {
+            Self::Stream(reader) => super::streaming::evaluate(reader, model, config, device),
             Self::Text(ids) => evaluation::evaluate_windows(
                 model,
                 ids,
@@ -112,4 +161,15 @@ impl TrainingData {
             }
         }
     }
+}
+
+pub fn write_io_report(train: &TrainingData, validation: &TrainingData, out: &Path) -> Result<()> {
+    fs::write(
+        out.join("data-reader.json"),
+        serde_json::to_vec_pretty(&serde_json::json!({
+            "train":train.reading_stats(),"validation":validation.reading_stats(),"test_used":false,
+            "note":"Cache counts token pages; tokenizer, index, file handles, batches and OS cache are separate"
+        }))?,
+    )?;
+    Ok(())
 }

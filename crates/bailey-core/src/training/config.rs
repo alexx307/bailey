@@ -17,6 +17,7 @@ pub enum DataFormat {
     #[default]
     Text,
     Shards,
+    ShardsStream,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -43,6 +44,15 @@ pub struct TrainConfig {
     pub objective: Objective,
     #[serde(default)]
     pub data_format: DataFormat,
+    #[serde(default = "default_cache", skip_serializing_if = "is_default_cache")]
+    pub shard_cache_mib: usize,
+}
+
+fn default_cache() -> usize {
+    8
+}
+fn is_default_cache(value: &usize) -> bool {
+    *value == default_cache()
 }
 
 fn constant_rate() -> f64 {
@@ -58,9 +68,16 @@ impl TrainConfig {
         ensure!(
             !matches!(
                 (self.data_format, self.objective),
-                (DataFormat::Shards, Objective::Dialogue)
+                (
+                    DataFormat::Shards | DataFormat::ShardsStream,
+                    Objective::Dialogue
+                )
             ),
             "Les shards actuels sont destines au texte continu ; le dialogue exige ses frontieres d'exemples"
+        );
+        ensure!(
+            (1..=256).contains(&self.shard_cache_mib),
+            "Cache shards attendu : 1..256 Mio par partition"
         );
         ensure!(
             (1..=1_000_000).contains(&self.steps),

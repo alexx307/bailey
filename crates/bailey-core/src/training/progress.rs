@@ -32,7 +32,7 @@ pub fn signature(config: &TrainConfig) -> Result<String> {
             checkpoint::fingerprint(&config.data.join("train.txt"))?,
             checkpoint::fingerprint(&config.data.join("validation.txt"))?,
         ],
-        DataFormat::Shards => vec![checkpoint::fingerprint(
+        DataFormat::Shards | DataFormat::ShardsStream => vec![checkpoint::fingerprint(
             &config.data.join("forge-manifest.json"),
         )?],
     };

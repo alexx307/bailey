@@ -53,6 +53,7 @@ fn interrupted_training_matches_uninterrupted_and_rejects_changed_data() -> Resu
         evaluation_windows: 4,
         objective: Objective::NextToken,
         data_format: DataFormat::Text,
+        shard_cache_mib: 8,
     };
     let initial = temp.path().join("initial");
     assert!(!training::train_until(

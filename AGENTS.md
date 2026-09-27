@@ -39,8 +39,13 @@ Ces règles viennent des demandes explicites du propriétaire du projet.
   appris sans migration explicite ou expérience indépendante.
 - Les shards Forge sont immuables : vérifier les SHA256, la provenance et les
   IDs du tokenizer avant leur utilisation. Ne charger que train et validation
-  pendant l'entraînement. Le prototype actuel charge une partition en RAM ; ne
-  pas le présenter comme un lecteur en flux adapté à des milliards de tokens.
+  pendant l'entraînement. `shards` charge une partition en RAM ; `shards-stream`
+  lit des pages de 64 Kio avec cache borné. Distinguer ce lecteur de la construction
+  et de l'import des shards, qui restent des étapes séparées.
+- Pour le flux, valider tailles, SHA256 et IDs avant les lots, sans ouvrir les
+  shards test. Préserver le même tirage des fenêtres et la reprise des étapes.
+  Le cache ne représente pas toute la RAM : lots, tokenizer, index, handles et
+  cache du système sont distincts. Conserver les shards immuables pendant lecture.
 - `--init-from` ouvre une nouvelle séance avec les meilleurs poids et un nouvel
   AdamW. `resume` continue une séance interrompue depuis `latest.json`, avec les
   moments Adam, le pas global, le planning et les tirages par étape. Toujours
