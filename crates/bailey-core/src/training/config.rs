@@ -48,8 +48,12 @@ pub struct TrainConfig {
     pub shard_cache_mib: usize,
 }
 
+/// 32 Mio : mesure le 27 sept. sur le corpus livres reel (646 Mio train
+/// shards) - couvre le pire cas d'un lot de 64 sequences sans partager de
+/// page (jusqu'a 64 pages de 64 Kio) et laisse la validation retenir ses
+/// fenetres reutilisees d'un appel a l'autre. Toujours trivial vs 32 Gio RAM.
 fn default_cache() -> usize {
-    8
+    32
 }
 fn is_default_cache(value: &usize) -> bool {
     *value == default_cache()
